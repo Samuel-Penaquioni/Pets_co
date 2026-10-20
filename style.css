@@ -1,0 +1,377 @@
+/* BASE E UTILITÁRIOS DE SEGURANÇA */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--h, 126px) + 12px); }
+body { margin: 0; min-width: 320px; }
+img, svg { max-width: 100%; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-decoration: none; }
+.text-g { color: #678d3c; }
+.text-gd { color: #3f5a22; }
+.text-gl { color: #e6f5b0; }
+.bg-g { background-color: #678d3c; }
+.bg-gd { background-color: #3f5a22; }
+
+/* ========================================
+   ESTILOS GERAIS
+======================================== */
+
+:root {
+  --h: 126px;
+}
+
+html {
+  scroll-padding-top: calc(var(--h) + 8px);
+}
+
+body {
+  font-family: "Nunito", sans-serif;
+  color: #2f4419;
+  background: #f8fbe9;
+}
+
+h1,
+h2,
+h3,
+.t {
+  font-family: "Fredoka", sans-serif;
+}
+
+/* ========================================
+   CABEÇALHO FIXO
+======================================== */
+
+/* Cabeçalho com o cachorro esticado e o menu no corpo */
+
+.top {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 30;
+  background: rgba(230, 245, 176, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(63, 90, 34, 0.2);
+}
+
+.top-in {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo img {
+  height: 34px;
+  width: auto;
+  display: block;
+}
+
+/* ========================================
+   CACHORRO DO MENU
+======================================== */
+
+.dog {
+  --s: 0.4;
+
+  flex: 1;
+  max-width: 860px;
+  margin-left: auto;
+  display: flex;
+  align-items: flex-start;
+  height: calc(275px * var(--s));
+  container-type: inline-size;
+}
+
+.parte {
+  flex: none;
+  height: 100%;
+  background: url("assets/images/cachorro-parado.webp") no-repeat;
+  background-size: calc(800px * var(--s)) calc(275px * var(--s));
+}
+
+.dog.play .parte {
+  background-image: url("assets/images/cachorro-anim.webp");
+}
+
+.frente {
+  width: calc(195px * var(--s));
+}
+
+.tras {
+  width: calc(150px * var(--s));
+  background-position: calc(-650px * var(--s)) 0;
+}
+
+/* ========================================
+   MENU DESKTOP
+======================================== */
+
+.menu {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  margin-top: calc(141px * var(--s));
+  height: calc(86px * var(--s));
+
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+
+  padding: 2px 8px;
+  border-top: 1.5px solid #1d3557;
+  border-bottom: 1.5px solid #1d3557;
+
+  background:
+    radial-gradient(ellipse 30px 11px at 7% 0, #b97336 68%, transparent 72%),
+    radial-gradient(
+      ellipse 36px 12px at 93% 100%,
+      #b97336 68%,
+      transparent 72%
+    ),
+    #f3ece0;
+}
+
+/* Indicador animado do menu */
+
+.glider {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 0;
+
+  border-radius: 999px;
+  background: #678d3c;
+  border: 1.5px solid #1d3557;
+
+  transition:
+    transform 0.35s cubic-bezier(0.4, 1.5, 0.5, 1),
+    width 0.35s;
+}
+
+/* Itens do menu */
+
+.item {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+
+  padding: 0 0.7em;
+  border-radius: 999px;
+
+  color: #1d3557;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 12.5px;
+
+  transition: color 0.2s;
+}
+
+.item svg {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.item:hover,
+.item:focus-visible,
+.item.active {
+  color: #fff;
+  outline: none;
+}
+
+.item:hover svg {
+  animation: hop 0.4s;
+}
+
+/* Animação dos ícones */
+
+@keyframes hop {
+  50% {
+    transform: translateY(-3px) rotate(-8deg);
+  }
+}
+
+/* Contador de notificações */
+
+.badge {
+  position: absolute;
+  top: -7px;
+  right: -3px;
+
+  min-width: 17px;
+  height: 17px;
+
+  border-radius: 99px;
+  background: #d98a2b;
+  color: #fff;
+
+  font-size: 10px;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 4px;
+  border: 1.5px solid #f3ece0;
+}
+
+.badge.pop {
+  animation: hop 0.4s;
+}
+
+/* Oculta os ícones quando o espaço do cachorro é reduzido */
+
+@container (max-width: 760px) {
+  .item svg {
+    display: none;
+  }
+}
+
+/* ========================================
+   MENU MOBILE
+======================================== */
+
+.mbar {
+  display: none;
+}
+
+@media (max-width: 859px) {
+  :root {
+    --h: 100px;
+  }
+
+  .top-in {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .dog {
+    display: none;
+  }
+
+  .mbar {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+  }
+
+  .mbar .item {
+    flex: none;
+    padding: 0.35rem 0.8rem;
+
+    background: #fff;
+    border: 2px solid #1d3557;
+    box-shadow: 0 2px 0 #1d3557;
+
+    font-size: 13px;
+  }
+
+  .mbar .item svg {
+    display: inline-block;
+  }
+
+  .mbar .item.active {
+    background: #678d3c;
+  }
+
+  .mbar .badge {
+    border-color: #fff;
+  }
+}
+
+/* ========================================
+   HERO
+======================================== */
+
+.hero {
+  background:
+    radial-gradient(circle at 15% 20%, #f3fbc9 0, transparent 40%),
+    radial-gradient(circle at 90% 70%, #d4ec8e 0, transparent 45%), #e6f5b0;
+}
+
+/* Animação flutuante */
+
+@keyframes float {
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.fl {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Etiquetas decorativas */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  background: #fff;
+  border: 2px solid #1d3557;
+  box-shadow: 0 3px 0 #1d3557;
+  border-radius: 999px;
+
+  padding: 0.35rem 0.9rem;
+
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  color: #1d3557;
+}
+
+/* Acessibilidade: reduz animações */
+
+@media (prefers-reduced-motion: reduce) {
+  .fl {
+    animation: none;
+  }
+}
+
+/* ========================================
+   BOTÕES
+======================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+
+  transition: 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ACABAMENTO E RESPONSIVIDADE */
+:where(a):focus-visible { outline: 3px solid #d98a2b; outline-offset: 3px; }
+@media (max-width: 859px) {
+  .top { position: sticky; }
+  .top-in { padding: 8px 12px; }
+  .logo img { height: 32px; max-width: 180px; }
+  .mbar { scrollbar-width: thin; }
+  .mbar .item { min-height: 38px; }
+  .hero h1 { font-size: clamp(2.35rem, 9vw, 3.5rem); }
+}
+@media (max-width: 480px) {
+  .chip { font-size: .8rem; padding: .3rem .65rem; }
+  .btn { padding: .7rem 1rem; font-size: .95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

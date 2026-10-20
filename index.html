@@ -1,0 +1,201 @@
+<!doctype html>
+
+<html lang="pt-BR" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Pets'co — Banho, tosa, veterinário e produtos</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="top">
+      <div class="top-in">
+        <a href="#inicio" class="logo" aria-label="Pets'co"
+          ><img src="assets/images/petsco-logo.png" alt="Pets'co"
+        /></a>
+
+        <div class="dog">
+          <div class="parte frente"></div>
+
+          <nav class="menu" aria-label="Menu principal">
+            <span class="glider"></span>
+
+            <a href="#inicio" class="item active"
+              ><i data-lucide="house"></i>Início</a
+            >
+
+            <a href="#produtos" class="item"
+              ><i data-lucide="shopping-bag"></i>Produtos</a
+            >
+
+            <a href="#banho" class="item"
+              ><i data-lucide="scissors"></i>Banho e Tosa</a
+            >
+
+            <a href="#vet" class="item"
+              ><i data-lucide="stethoscope"></i>Veterinário</a
+            >
+
+            <a href="#sobre" class="item"
+              ><i data-lucide="info"></i>Sobre nós</a
+            >
+
+            <a href="#carrinho" class="item"
+              ><i data-lucide="shopping-cart"></i>Carrinho<span class="badge"
+                >0</span
+              ></a
+            >
+          </nav>
+
+          <div class="parte tras"></div>
+        </div>
+
+        <nav class="mbar" aria-label="Menu"></nav>
+      </div>
+    </div>
+
+    <!-- HERO -->
+
+    <section
+      id="inicio"
+      class="hero relative overflow-hidden px-4"
+      style="padding-top: calc(var(--h) + 36px); padding-bottom: 120px"
+    >
+      <div
+        class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center relative"
+      >
+        <div>
+          <span class="chip">🚚 Frete grátis acima de R$ 99</span>
+
+          <h1
+            class="text-5xl md:text-6xl font-bold text-gd leading-[1.05] mt-5"
+          >
+            Seu pet merece <span class="text-g">carinho de verdade</span>
+          </h1>
+
+          <p class="mt-5 text-lg text-gd/80 max-w-lg">
+            Banho, tosa, consultas veterinárias e tudo para o dia a dia do seu
+            melhor amigo, num só lugar.
+          </p>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              href="#produtos"
+              class="btn bg-g text-white shadow-[0_5px_0_#3f5a22]"
+              ><i data-lucide="shopping-bag" class="w-5 h-5"></i>Ver produtos</a
+            >
+
+            <a
+              href="#agendar"
+              class="btn bg-white text-gd shadow-[0_5px_0_#cfe39a]"
+              ><i data-lucide="calendar-check" class="w-5 h-5"></i>Agendar
+              banho</a
+            >
+          </div>
+
+          <div class="mt-10 flex gap-8 text-gd">
+            <div>
+              <p class="t text-3xl font-bold">+2.000</p>
+              <p class="text-sm">pets atendidos</p>
+            </div>
+
+            <div>
+              <p class="t text-3xl font-bold">4,9 ★</p>
+              <p class="text-sm">avaliação</p>
+            </div>
+
+            <div>
+              <p class="t text-3xl font-bold">+5</p>
+              <p class="text-sm">anos de história</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative h-[340px] md:h-[440px]" aria-hidden="true">
+          <div
+            class="absolute inset-4 md:inset-2 rounded-full bg-white/60 border-4 border-white"
+          ></div>
+
+          <div class="absolute inset-0 flex items-center justify-center fl">
+            <span class="text-[9rem] md:text-[12rem] leading-none">🐶</span>
+          </div>
+
+          <span
+            class="absolute left-0 top-10 text-6xl fl"
+            style="animation-delay: 0.6s"
+            >🐱</span
+          >
+
+          <span
+            class="chip absolute right-0 top-8 fl"
+            style="animation-delay: 0.3s"
+            >✂️ Banho e Tosa</span
+          >
+
+          <span
+            class="chip absolute left-2 bottom-12 fl"
+            style="animation-delay: 0.9s"
+            >🩺 Veterinário</span
+          >
+
+          <span
+            class="chip absolute right-4 bottom-2 fl"
+            style="animation-delay: 1.2s"
+            >🦴 Petiscos</span
+          >
+        </div>
+      </div>
+
+      <svg
+        class="absolute bottom-0 left-0 w-full"
+        viewBox="0 0 1440 80"
+        preserveAspectRatio="none"
+        style="height: 70px"
+        aria-hidden="true"
+      >
+        <path d="M0 40 Q360 100 720 40 T1440 40 V80 H0Z" fill="#f8fbe9" />
+      </svg>
+    </section>
+
+    <footer class="bg-gd text-white/85 py-10 px-4">
+      <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-6 text-sm">
+        <div>
+          <p class="t text-2xl font-bold text-gl">PETS/CO</p>
+          <p class="mt-2">Cuidado e carinho para o seu melhor amigo.</p>
+        </div>
+
+        <div>
+          <p class="font-bold text-gl">Contato</p>
+          <p class="mt-2">
+            📍 Rua Exemplo, 123 — Centro<br />📞 (19) 0000-0000<br />✉️
+            contato@petsco.com.br
+          </p>
+        </div>
+
+        <div>
+          <p class="font-bold text-gl">Horário</p>
+          <p class="mt-2">Seg a Sex: 8h às 19h<br />Sábado: 8h às 17h</p>
+        </div>
+      </div>
+
+      <p class="text-center text-xs mt-8 text-white/50">
+        © 2026 Pets'co — Projeto acadêmico FATEC
+      </p>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
