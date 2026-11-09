@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <script>document.documentElement.classList.add('js');setTimeout(function(){document.documentElement.classList.add('ok')},4000)</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="image" href="assets/images/cachorro-parado.webp" />
+  <link rel="preload" as="image" href="assets/images/petsco-logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sobre nós — Pets’co</title>
+  <meta name="description" content="A história e os valores da Pets’co." />
+  <link rel="icon" href="assets/images/petsco-logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="tailwind.config.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="sobre">
+  <main id="main">
+    <header class="hero pt-h px-4 pb-14 rounded-b-[2.5rem]">
+      <div class="max-w-6xl mx-auto flex items-center justify-between gap-6">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-bold text-gd">Sobre nós</h1>
+          <p class="mt-3 text-lg text-gd/80 max-w-xl">Uma loja de bairro feita por quem ama bichos.</p>
+        </div>
+        <span class="hidden md:block text-[7rem] leading-none fl" aria-hidden="true">💚</span>
+      </div>
+    </header>
+    <section class="max-w-4xl mx-auto px-4 py-14 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h2 class="text-3xl font-bold text-gd">Nossa história</h2>
+        <p class="mt-3 text-gd/80">A Pets’co nasceu do amor por animais. Começamos como uma pequena loja de bairro e hoje reunimos banho e tosa, clínica veterinária e loja num só endereço, sempre tratando cada pet como parte da família.</p>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-gd">
+        <div class="card p-4"><p class="t text-2xl font-bold text-g">+2.000</p><p class="text-xs">pets atendidos</p></div>
+        <div class="card p-4"><p class="t text-2xl font-bold text-g">+5</p><p class="text-xs">anos</p></div>
+        <div class="card p-4"><p class="t text-2xl font-bold text-g">4,9 ★</p><p class="text-xs">avaliação</p></div>
+      </div>
+    </section>
+
+    <section class="bg-gl py-14 px-4">
+      <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+        <div class="card p-6"><i data-lucide="heart-handshake" class="w-9 h-9 text-g"></i><h3 class="font-semibold text-lg mt-2">Cuidado de verdade</h3><p class="text-sm text-gd/70 mt-1">Todo pet é recebido com paciência, sem pressa e sem estresse.</p></div>
+        <div class="card p-6"><i data-lucide="shield-check" class="w-9 h-9 text-g"></i><h3 class="font-semibold text-lg mt-2">Transparência</h3><p class="text-sm text-gd/70 mt-1">Preço claro antes de começar e aviso a cada etapa.</p></div>
+        <div class="card p-6"><i data-lucide="leaf" class="w-9 h-9 text-g"></i><h3 class="font-semibold text-lg mt-2">Produtos selecionados</h3><p class="text-sm text-gd/70 mt-1">Só vendemos o que a gente daria para os nossos próprios pets.</p></div>
+      </div>
+    </section>
+
+    <section class="max-w-6xl mx-auto px-4 py-16 grid md:grid-cols-2 gap-8">
+      <div class="space-y-4">
+        <h2 class="text-3xl font-bold text-gd">Venha nos visitar</h2>
+        <div class="card p-5 flex gap-4"><i data-lucide="map-pin" class="text-g w-7 h-7 shrink-0"></i><p>Rua Exemplo, 123 — Centro<br><span class="text-sm text-gd/70">Estacionamento em frente à loja</span></p></div>
+        <div class="card p-5 flex gap-4"><i data-lucide="phone" class="text-g w-7 h-7 shrink-0"></i><p>(19) 0000-0000<br>contato@petsco.com.br</p></div>
+        <div class="card p-5 flex gap-4"><i data-lucide="clock" class="text-g w-7 h-7 shrink-0"></i><p>Seg a Sex: 8h às 19h<br>Sábado: 8h às 17h<br><span class="text-sm text-gd/70">Domingo: fechado</span></p></div>
+      </div>
+      <form id="contato" class="card p-6 grid gap-4 content-start">
+        <h3 class="font-semibold text-xl">Fale com a gente</h3>
+        <div><label class="lbl" for="cn">Nome</label><input class="inp" id="cn" required></div>
+        <div><label class="lbl" for="ce">E-mail</label><input class="inp" id="ce" type="email" required></div>
+        <div><label class="lbl" for="cm">Mensagem</label><textarea class="inp" id="cm" rows="4" required></textarea></div>
+        <button class="btn bg-g text-white justify-center shadow-[0_5px_0_#3f5a22]"><i data-lucide="send" class="w-5 h-5"></i>Enviar mensagem</button>
+      </form>
+    </section>
+  </main>
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+  <script src="pages.js"></script>
+</body>
+</html>

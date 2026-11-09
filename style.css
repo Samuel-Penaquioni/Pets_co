@@ -3,6 +3,7 @@
 html { scroll-behavior: smooth; scroll-padding-top: calc(var(--h, 126px) + 12px); }
 body { margin: 0; min-width: 320px; }
 img, svg { max-width: 100%; }
+button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
 .text-g { color: #678d3c; }
@@ -10,6 +11,8 @@ a { color: inherit; text-decoration: none; }
 .text-gl { color: #e6f5b0; }
 .bg-g { background-color: #678d3c; }
 .bg-gd { background-color: #3f5a22; }
+.bg-gl { background-color: #e6f5b0; }
+.bg-or { background-color: #d98a2b; }
 
 /* ========================================
    ESTILOS GERAIS
@@ -240,7 +243,7 @@ h3,
   display: none;
 }
 
-@media (max-width: 859px) {
+@media (max-width: 899px) {
   :root {
     --h: 100px;
   }
@@ -337,6 +340,22 @@ h3,
 }
 
 /* ========================================
+   CARDS
+======================================== */
+
+.card {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 6px 0 #dcebb0;
+  transition: 0.25s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 0 #cfe39a;
+}
+
+/* ========================================
    BOTÕES
 ======================================== */
 
@@ -358,9 +377,23 @@ h3,
   transform: translateY(-2px);
 }
 
+/* ========================================
+   DRAWER
+======================================== */
+
+#drawer {
+  transition: transform 0.3s;
+}
+
 /* ACABAMENTO E RESPONSIVIDADE */
-:where(a):focus-visible { outline: 3px solid #d98a2b; outline-offset: 3px; }
-@media (max-width: 859px) {
+:where(input, select, textarea) { width: 100%; min-width: 0; color: #263719; background: #fff; }
+:where(input, select, textarea):focus-visible, :where(button, a):focus-visible { outline: 3px solid #d98a2b; outline-offset: 3px; }
+button { cursor: pointer; }
+#grid > * { min-width: 0; }
+#grid img { display: block; width: 100%; object-fit: contain; }
+#drawer { max-width: min(100%, 420px); }
+#items:empty::before { content: "Seu carrinho ainda está vazio."; display: block; padding: 2rem 0; color: #647254; text-align: center; }
+@media (max-width: 899px) {
   .top { position: sticky; }
   .top-in { padding: 8px 12px; }
   .logo img { height: 32px; max-width: 180px; }
@@ -371,7 +404,252 @@ h3,
 @media (max-width: 480px) {
   .chip { font-size: .8rem; padding: .3rem .65rem; }
   .btn { padding: .7rem 1rem; font-size: .95rem; }
+  #inicio .mt-10 { gap: 1rem; }
+  #agendar .card { padding: 1.25rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* ========================================
+   MULTIPÁGINAS: componentes compartilhados
+======================================== */
+.pt-h { padding-top: calc(var(--h) + 36px); }
+.inp { display: block; border: 2px solid #e6f5b0; border-radius: .75rem; padding: .7rem 1rem; background: #fff; transition: border-color .2s; }
+.inp:focus { border-color: #678d3c; outline: none; }
+.lbl { display: block; font-weight: 700; font-size: .85rem; margin-bottom: .25rem; color: #3f5a22; }
+.fchip { border: 2px solid #e6f5b0; background: #fff; color: #3f5a22; border-radius: 999px; padding: .4rem .95rem; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: .9rem; transition: .2s; }
+.fchip:hover { border-color: #678d3c; }
+.fchip.on { background: #678d3c; border-color: #678d3c; color: #fff; }
+.snav { display: flex; align-items: center; gap: .6rem; width: 100%; padding: .6rem .8rem; border-radius: .75rem; font-weight: 700; color: #3f5a22; text-align: left; transition: .2s; }
+.snav:hover { background: #f8fbe9; }
+.snav.on { background: #e6f5b0; }
+#toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translate(-50%, 140%); background: #3f5a22; color: #fff; padding: .75rem 1.25rem; border-radius: 999px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,.25); transition: transform .3s; max-width: calc(100% - 32px); text-align: center; }
+#toast.show { transform: translate(-50%, 0); }
+.wpp { position: fixed; right: 16px; bottom: 16px; z-index: 35; width: 52px; height: 52px; border-radius: 50%; background: #25a244; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+.wpp:hover { transform: scale(1.06); }
+details.faq { background: #fff; border-radius: 1rem; padding: 1rem 1.25rem; box-shadow: 0 4px 0 #dcebb0; }
+details.faq summary { font-weight: 700; cursor: pointer; font-family: "Fredoka", sans-serif; color: #3f5a22; }
+details.faq p { margin-top: .5rem; color: #4d5f38; }
+@media (max-width: 899px) { .pt-h { padding-top: 36px; } }
+
+/* ========================================
+   CORREÇÕES: menu com ícones e carrinho sem piscar
+======================================== */
+.item.ico { flex: none; padding: 0 .6em; }
+.item.ico svg { width: 1.45em; height: 1.45em; }
+@container (max-width: 760px) { .item.ico svg { display: block; } }
+.item.logged::after { content: ""; position: absolute; top: 5px; right: 3px; width: 9px; height: 9px; border-radius: 50%; background: #d98a2b; border: 1.5px solid #f3ece0; }
+.glider { transition: none; }
+.menu.ready .glider { transition: transform .35s cubic-bezier(.4, 1.5, .5, 1), width .35s; }
+
+/* o carrinho nasce escondido por este CSS (carrega antes do Tailwind) */
+#drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: min(100%, 420px); background: #fff; z-index: 50; display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,.3); transform: translateX(100%); visibility: hidden; transition: transform .3s, visibility 0s .3s; }
+#drawer.open { transform: none; visibility: visible; transition: transform .3s; }
+#shade { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 40; opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
+#shade.open { opacity: 1; visibility: visible; transition: opacity .3s; }
+
+/* ========================================
+   SEM PISCAR AO TROCAR DE PÁGINA
+======================================== */
+html { background: #f8fbe9; }
+/* o cabeçalho fica sempre visível; só o conteúdo entra e sai suave */
+html.js:not(.ok) main, html.js:not(.ok) footer, html.js:not(.ok) .wpp { opacity: 0; }
+html.ok main { animation: entrar .5s cubic-bezier(.2, .8, .2, 1) backwards; }
+html.ok footer, html.ok .wpp { animation: aparecer .6s ease-out backwards; }
+@keyframes entrar { from { opacity: 0; transform: translateY(16px); } }
+@keyframes aparecer { from { opacity: 0; } }
+html.saindo main, html.saindo footer, html.saindo .wpp { opacity: 0; transform: translateY(-8px); transition: opacity .2s ease-in, transform .2s ease-in; }
+.skip { position: fixed; left: 8px; top: -60px; z-index: 60; background: #fff; color: #3f5a22; padding: .5rem .9rem; border-radius: .5rem; font-weight: 700; transition: top .2s; }
+.skip:focus { top: 8px; }
+
+/* ========================================
+   MENU REFEITO: corpo vivo, coleira e brilho
+======================================== */
+.menu { isolation: isolate; background: linear-gradient(180deg, #fdf9f0 0%, #f3ece0 52%, #e3d6bd 100%); }
+.menu::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background-repeat: no-repeat;
+  background:
+    radial-gradient(ellipse 40px 10px at 11% 0, rgba(185,115,54,.92) 68%, transparent 72%),
+    radial-gradient(ellipse 52px 11px at 63% 0, rgba(185,115,54,.92) 68%, transparent 72%),
+    radial-gradient(ellipse 26px 8px at 33% 100%, rgba(185,115,54,.9) 68%, transparent 72%),
+    radial-gradient(ellipse 18px 6px at 87% 100%, rgba(185,115,54,.9) 68%, transparent 72%),
+    radial-gradient(circle 2.6px at 24% 64%, #8a4f22 68%, transparent 72%),
+    radial-gradient(circle 1.8px at 28% 74%, #b97336 68%, transparent 72%),
+    radial-gradient(circle 2.2px at 47% 36%, #b97336 68%, transparent 72%),
+    radial-gradient(circle 1.5px at 50% 30%, #b97336 68%, transparent 72%),
+    radial-gradient(circle 3px at 79% 62%, #8a4f22 68%, transparent 72%);
+  background-repeat: no-repeat;
+}
+.glider { background: linear-gradient(180deg, #7ba84b, #678d3c 60%, #587a32); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.35), 0 1.5px 0 #1d3557; }
+.menu.chega:not(.ready) .item.active:not(:hover) { color: #1d3557; }
+
+/* coleira com plaquinha */
+.collar { position: absolute; left: -1px; top: -2px; bottom: -2px; width: 9px; z-index: 2; background: #d98a2b; border: 1.5px solid #1d3557; border-radius: 4px; pointer-events: none; }
+.collar::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; margin: -2px 0 0 -5px; border: 1.5px solid #1d3557; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe08a, #e0a82e 70%); transform-origin: 50% -3px; }
+.mbar .collar { display: none; }
+
+/* quando o cachorro anima (4,84 s = 4 ciclos de 1,21 s), o corpo acompanha */
+.dog.play .menu::before { animation: manchas 1.21s ease-in-out infinite; }
+.dog.play .collar::after { animation: plaquinha 1.21s ease-in-out infinite; }
+@keyframes manchas { 50% { background-position: 3px 0; } }
+@keyframes plaquinha { 25% { transform: rotate(20deg); } 75% { transform: rotate(-20deg); } }
+
+/* ========================================
+   MENU = CORPO DO CACHORRO (contorno idêntico ao da imagem)
+   - O corpo da imagem não é reto, então o fundo do menu é um SVG com o
+     mesmo contorno (sem degrau nas emendas).
+   - A emenda do rabo foi movida para uma coluna da imagem onde nenhuma
+     mancha é cortada (antes uma mancha aparecia cortada ao meio).
+======================================== */
+.tras { width: calc(276px * var(--s)); background-position: calc(-524px * var(--s)) 0; }
+.menu {
+  margin-top: calc(140px * var(--s));
+  height: calc(92px * var(--s));
+  margin-left: -1px;
+  margin-right: -1px;
+  padding: 0 14px 0 20px;
+  border: 0;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 329 92' preserveAspectRatio='none'><path d='M-3 1.45 L0 1.45 L25 3.45 L55 4.45 L85 5.45 L115 6.45 L145 6.45 L175 7.45 L205 7.45 L235 7.45 L265 7.45 L295 6.45 L325 6.45 L329 6.45 L329 87.55 L325 87.55 L295 88.55 L265 88.55 L235 89.55 L205 89.55 L175 89.55 L145 89.55 L115 89.55 L85 89.55 L55 89.55 L25 89.55 L0 89.55 Z' fill='%23f3ebde'/><path d='M-3 1.45 L0 1.45 L25 3.45 L55 4.45 L85 5.45 L115 6.45 L145 6.45 L175 7.45 L205 7.45 L235 7.45 L265 7.45 L295 6.45 L325 6.45 L329 6.45 L332 6.45' fill='none' stroke='%231a3254' stroke-width='2.6' stroke-linejoin='round'/><path d='M-3 89.55 L0 89.55 L25 89.55 L55 89.55 L85 89.55 L115 89.55 L145 89.55 L175 89.55 L205 89.55 L235 89.55 L265 88.55 L295 88.55 L325 87.55 L329 87.55 L332 87.55' fill='none' stroke='%231a3254' stroke-width='2.6' stroke-linejoin='round'/></svg>") 0 0 / 100% 100% no-repeat;
+}
+.menu::before { clip-path: polygon(0.00% calc(var(--s) * 1.45px), 7.60% calc(var(--s) * 3.45px), 16.72% calc(var(--s) * 4.45px), 25.84% calc(var(--s) * 5.45px), 34.95% calc(var(--s) * 6.45px), 44.07% calc(var(--s) * 6.45px), 53.19% calc(var(--s) * 7.45px), 62.31% calc(var(--s) * 7.45px), 71.43% calc(var(--s) * 7.45px), 80.55% calc(var(--s) * 7.45px), 89.67% calc(var(--s) * 6.45px), 98.78% calc(var(--s) * 6.45px), 100.00% calc(var(--s) * 6.45px), 100.00% calc(var(--s) * 87.55px), 98.78% calc(var(--s) * 87.55px), 89.67% calc(var(--s) * 88.55px), 80.55% calc(var(--s) * 88.55px), 71.43% calc(var(--s) * 89.55px), 62.31% calc(var(--s) * 89.55px), 53.19% calc(var(--s) * 89.55px), 44.07% calc(var(--s) * 89.55px), 34.95% calc(var(--s) * 89.55px), 25.84% calc(var(--s) * 89.55px), 16.72% calc(var(--s) * 89.55px), 7.60% calc(var(--s) * 89.55px), 0.00% calc(var(--s) * 89.55px)); }
+
+/* coleira discreta sobre a emenda do pescoço */
+.collar { left: -5px; top: -2px; bottom: -2px; width: 9px; border-radius: 5px; background: linear-gradient(90deg, #e9a64a, #d98a2b 60%, #c4781f); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.35); }
+.collar::after { top: calc(100% - 3px); width: 9px; height: 9px; margin: 0 0 0 -4.5px; }
+
+.glider { top: 5px; bottom: 5px; }
+.item.ico { padding: 0 .55em; }
+.item.ico svg { width: 1.3em; height: 1.3em; }
+
+/* o menu ficou um pouco mais curto: aperta o texto em telas médias */
+@container (max-width: 820px) { .item { font-size: 11.5px; padding: 0 .5em; } .item.ico { padding: 0 .45em; } }
+
+/* ========================================
+   TESTE: sem coleira (o corpo do menu continua)
+   (para voltar a coleira, apague este bloco)
+======================================== */
+.collar { display: none; }
+
+/* ========================================
+   CABEÇALHO MAIS DIVERTIDO
+   - fundo limpo, com degradê suave
+   - "chão" de grama onde o cachorro pisa
+   - logo em selo (estilo adesivo) alinhado ao menu
+======================================== */
+.top {
+  border-bottom: 0;
+  background:
+    linear-gradient(180deg, rgba(243, 252, 208, .96) 0%, rgba(222, 241, 160, .96) 100%);
+  box-shadow: 0 4px 0 rgba(63, 90, 34, .16);
+}
+
+/* chão de grama sob o cachorro */
+.top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 9px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='7' viewBox='0 0 26 7'><path d='M0 7V4Q6.5 0 13 4T26 4V7Z' fill='%23678d3c'/></svg>") repeat-x 0 0 / 26px 7px,
+    linear-gradient(#678d3c, #678d3c) 0 6px / 100% 3px no-repeat;
+}
+
+/* logo em selo, alinhado à altura do menu */
+.logo {
+  align-self: center;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  padding: 5px 16px;
+  background: #fff;
+  border: 2px solid #1d3557;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 #1d3557;
+  transition: transform .2s, box-shadow .2s;
+}
+.logo img { height: 30px; }
+.logo:hover { transform: translateY(-2px) rotate(-2deg); box-shadow: 0 5px 0 #1d3557; }
+.logo:active { transform: translateY(2px); box-shadow: 0 1px 0 #1d3557; }
+
+@media (max-width: 899px) {
+  .logo { align-self: center; margin: 0; padding: 3px 14px; }
+  .logo img { height: 22px; }
+  .top::after { height: 6px; background: linear-gradient(#678d3c, #678d3c); }
+  .top { padding-bottom: 6px; }
+}
+
+/* ========================================
+   RODAPÉ
+======================================== */
+.foot { position: relative; margin-top: 56px; background: #3f5a22; color: rgba(255,255,255,.82); }
+.foot::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -23px; height: 24px; pointer-events: none;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 24' preserveAspectRatio='none'><path d='M0 24V12Q180 -4 360 12T720 12T1080 12T1440 12V24Z' fill='%233f5a22'/></svg>") 0 0 / 100% 100% no-repeat;
+}
+.foot-in { max-width: 1152px; margin: 0 auto; padding: 40px 16px 24px; }
+
+.foot-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,.16); }
+.foot-cta-t { font-size: 1.75rem; font-weight: 700; color: #e6f5b0; line-height: 1.1; }
+.foot-cta-s { margin-top: 4px; font-size: .95rem; }
+.foot-cta-b { display: flex; flex-wrap: wrap; gap: 10px; }
+.foot-ghost { color: #fff; border: 2px solid rgba(255,255,255,.4); }
+.foot-ghost:hover { background: rgba(255,255,255,.1); }
+
+.foot-grid { display: grid; gap: 32px; padding: 32px 0; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); font-size: .92rem; }
+.foot-logo { display: inline-flex; padding: 6px 16px; background: #fff; border-radius: 999px; box-shadow: 0 3px 0 rgba(0,0,0,.25); transition: transform .2s; }
+.foot-logo:hover { transform: translateY(-2px) rotate(-2deg); }
+.foot-logo img { height: 26px; width: auto; display: block; }
+.foot-txt { margin-top: 14px; max-width: 280px; line-height: 1.55; }
+.foot-h { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.05rem; color: #e6f5b0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.foot-soc { display: flex; gap: 10px; margin-top: 16px; }
+.foot-soc a { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.12); color: #fff; transition: .2s; }
+.foot-soc a:hover { background: #e6f5b0; color: #3f5a22; transform: translateY(-3px); }
+.foot-soc svg { width: 18px; height: 18px; }
+
+.foot-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.foot-links a { display: inline-block; transition: .2s; }
+.foot-links a:hover { color: #fff; transform: translateX(4px); }
+
+.foot-info { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.foot-info li { display: flex; gap: 10px; align-items: flex-start; }
+.foot-info svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: #e6f5b0; }
+
+.foot-hours { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.foot-hours li { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,.18); }
+.foot-hours li:last-child { border-bottom: 0; }
+.foot-hours b { color: #fff; font-weight: 700; }
+
+.foot-open { font-family: "Nunito", sans-serif; font-size: .7rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; }
+.foot-open::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: #d98a2b; }
+.foot-open.on::before { background: #7ddc6a; }
+.foot-open:empty { display: none; }
+
+.foot-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.16); font-size: .8rem; color: rgba(255,255,255,.6); }
+
+@media (max-width: 640px) {
+  .foot-cta-t { font-size: 1.4rem; }
+  .foot-cta-b .btn { flex: 1; justify-content: center; }
+  .foot-bottom { justify-content: center; text-align: center; }
+}
+
+/* ========================================
+   CABEÇALHO: barra creme arredondada (combina com os cards)
+   Para ajustar a cor, mude --barra.
+======================================== */
+.top {
+  --barra: #f1f7d6;
+  background: var(--barra);
+  left: clamp(8px, 2vw, 24px);
+  right: clamp(8px, 2vw, 24px);
+  border-radius: 0 0 30px 30px;
+  border-bottom: 0;
+  box-shadow: 0 6px 0 #cfe39a;
+}
+.top::after { display: none; }
+@media (max-width: 899px) { .top { border-radius: 0 0 22px 22px; } }
