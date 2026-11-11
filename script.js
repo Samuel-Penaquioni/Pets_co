@@ -2,53 +2,88 @@
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const R = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const R = (v) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const icons = () => window.lucide && window.lucide.createIcons();
 const LS = {
-  get: (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
-  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  get: (k, d) => {
+    try {
+      const v = JSON.parse(localStorage.getItem(k));
+      return v ?? d;
+    } catch {
+      return d;
+    }
+  },
+  set: (k, v) => {
+    try {
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch {}
+  },
 };
 
 /* ---------- Conta (demonstrativo: dados ficam só neste navegador) ---------- */
-const hash = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return String(h); };
-const Users = () => LS.get('ps_users', {});
-const me = () => Users()[LS.get('ps_me')] || null;
-const saveMe = u => { const all = Users(); all[u.email] = u; LS.set('ps_users', all); };
-const first = () => { const u = me(); return u ? u.name.split(' ')[0].slice(0, 9) : 'Entrar'; };
+const hash = (s) => {
+  let h = 0;
+  for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return String(h);
+};
+const Users = () => LS.get("ps_users", {});
+const me = () => Users()[LS.get("ps_me")] || null;
+const saveMe = (u) => {
+  const all = Users();
+  all[u.email] = u;
+  LS.set("ps_users", all);
+};
+const first = () => {
+  const u = me();
+  return u ? u.name.split(" ")[0].slice(0, 9) : "Entrar";
+};
 
 function toast(msg) {
-  let t = $('#toast');
-  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); }
+  let t = $("#toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    t.setAttribute("role", "status");
+    document.body.append(t);
+  }
   t.textContent = msg;
-  t.className = 'show';
+  t.className = "show";
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => (t.className = ''), 2800);
+  toast.t = setTimeout(() => (t.className = ""), 2800);
 }
 
 /* ---------- Cabeçalho, rodapé e carrinho (injetados em todas as páginas) ---------- */
-const PAGE = document.body.dataset.page || 'inicio';
+const PAGE = document.body.dataset.page || "inicio";
 
 const NAV = [
-  ['index.html', 'house', 'Início', 'inicio'],
-  ['produtos.html', 'shopping-bag', 'Produtos', 'produtos'],
-  ['banho-e-tosa.html', 'scissors', 'Banho e Tosa', 'banho'],
-  ['veterinario.html', 'stethoscope', 'Veterinário', 'vet'],
-  ['sobre.html', 'info', 'Sobre nós', 'sobre'],
-  ['conta.html', 'user', 'Entrar', 'conta'],
-  ['#carrinho', 'shopping-cart', 'Carrinho', 'cart']
+  ["index.html", "house", "Início", "inicio"],
+  ["produtos.html", "shopping-bag", "Produtos", "produtos"],
+  ["banho-e-tosa.html", "scissors", "Banho e Tosa", "banho"],
+  ["veterinario.html", "stethoscope", "Veterinário", "vet"],
+  ["sobre.html", "info", "Sobre nós", "sobre"],
+  ["conta.html", "user", "Entrar", "conta"],
+  ["#carrinho", "shopping-cart", "Carrinho", "cart"],
 ];
 
 function layout() {
   const items = NAV.map(([h, ic, t, k]) => {
-    const ico = k === 'conta' || k === 'cart';
-    return `<a href="${h}" class="item${ico ? ' ico' : ''}${k === PAGE ? ' active' : ''}${k === 'cart' ? ' js-cart' : ''}${k === 'conta' ? ' who' : ''}" data-k="${k}"${ico ? ` aria-label="${t}" title="${t}"` : ''}>
-      <i data-lucide="${ic}"></i>${ico ? '' : `<span>${t}</span>`}${k === 'cart' ? '<span class="badge">0</span>' : ''}
+    const ico = k === "conta" || k === "cart";
+    return `<a href="${h}" class="item${ico ? " ico" : ""}${k === PAGE ? " active" : ""}${k === "cart" ? " js-cart" : ""}${k === "conta" ? " who" : ""}" data-k="${k}"${ico ? ` aria-label="${t}" title="${t}"` : ""}>
+      <i data-lucide="${ic}"></i>${ico ? "" : `<span>${t}</span>`}${k === "cart" ? '<span class="badge">0</span>' : ""}
     </a>`;
-  }).join('');
+  }).join("");
 
-  const links = NAV.slice(0, 6).map(([h, , t, k]) => `<li><a class="hover:text-white" href="${h}">${k === 'conta' ? 'Minha conta' : t}</a></li>`).join('');
+  const links = NAV.slice(0, 6)
+    .map(
+      ([h, , t, k]) =>
+        `<li><a class="hover:text-white" href="${h}">${k === "conta" ? "Minha conta" : t}</a></li>`,
+    )
+    .join("");
 
-  document.body.insertAdjacentHTML('afterbegin', `
+  document.body.insertAdjacentHTML(
+    "afterbegin",
+    `
     <a href="#main" class="skip">Ir para o conteúdo</a>
     <header class="top"><div class="top-in">
       <a href="index.html" class="logo" aria-label="Pets’co — página inicial"><img src="assets/images/petsco-logo.png" alt="Pets’co" /></a>
@@ -58,9 +93,12 @@ function layout() {
         <div class="parte tras"></div>
       </div>
       <nav class="mbar" aria-label="Menu"></nav>
-    </div></header>`);
+    </div></header>`,
+  );
 
-  document.body.insertAdjacentHTML('beforeend', `
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
     <footer class="foot">
       <div class="foot-in">
         <div class="foot-cta">
@@ -79,9 +117,9 @@ function layout() {
             <a href="index.html" class="foot-logo" aria-label="Pets’co — página inicial"><img src="assets/images/petsco-logo.png" alt="Pets’co" /></a>
             <p class="foot-txt">Banho, tosa, veterinário e loja num só lugar. Cuidado e carinho para o seu melhor amigo.</p>
             <div class="foot-soc">
-              <a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a>
-              <a href="#" aria-label="Facebook"><i data-lucide="facebook"></i></a>
-              <a href="https://wa.me/5519000000000" target="_blank" rel="noopener" aria-label="WhatsApp"><i data-lucide="message-circle"></i></a>
+              <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+              <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+              <a href="https://wa.me/5519000000000" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg></a>
             </div>
           </div>
           <div>
@@ -128,23 +166,38 @@ function layout() {
         <button class="btn bg-g text-white w-full justify-center mt-3 shadow-[0_5px_0_#3f5a22]" id="checkoutBtn">Finalizar compra</button>
         <p class="text-xs text-gd/60 text-center pt-1">Página demonstrativa: nenhum pagamento real é processado.</p>
       </div>
-    </aside>`);
+    </aside>`,
+  );
 
   // menu mobile: cópia do menu do cachorro (sem o indicador)
-  $('.mbar').innerHTML = $('.menu').innerHTML.replace('<span class="glider"></span>', '');
+  $(".mbar").innerHTML = $(".menu").innerHTML.replace(
+    '<span class="glider"></span>',
+    "",
+  );
 
   // selo "Aberto agora / Fechado agora" no rodapé
-  const d = new Date(), dia = d.getDay(), hr = d.getHours() + d.getMinutes() / 60;
-  const aberto = dia >= 1 && dia <= 5 ? hr >= 8 && hr < 19 : dia === 6 ? hr >= 8 && hr < 17 : false;
-  const st = $('#aberto');
-  if (st) { st.textContent = aberto ? 'Aberto agora' : 'Fechado agora'; st.classList.toggle('on', aberto); }
+  const d = new Date(),
+    dia = d.getDay(),
+    hr = d.getHours() + d.getMinutes() / 60;
+  const aberto =
+    dia >= 1 && dia <= 5
+      ? hr >= 8 && hr < 19
+      : dia === 6
+        ? hr >= 8 && hr < 17
+        : false;
+  const st = $("#aberto");
+  if (st) {
+    st.textContent = aberto ? "Aberto agora" : "Fechado agora";
+    st.classList.toggle("on", aberto);
+  }
 }
 
 /* ---------- Carrinho ---------- */
-const FRETE_GRATIS = 99, FRETE = 12.9;
-let cart = LS.get('ps_cart', {});
+const FRETE_GRATIS = 99,
+  FRETE = 12.9;
+let cart = LS.get("ps_cart", {});
 
-const card = i => {
+const card = (i) => {
   const [e, n, v, c] = P[i];
   return `<article class="card p-5 text-center flex flex-col">
     <div class="text-6xl bg-cr rounded-2xl py-6" aria-hidden="true">${e}</div>
@@ -161,7 +214,11 @@ function add(i) {
   cart[i] = (cart[i] || 0) + 1;
   draw();
   toast(`${P[i][1]} no carrinho 🛒`);
-  $$('.badge').forEach(b => { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); });
+  $$(".badge").forEach((b) => {
+    b.classList.remove("pop");
+    void b.offsetWidth;
+    b.classList.add("pop");
+  });
 }
 
 function chg(i, d) {
@@ -171,169 +228,269 @@ function chg(i, d) {
 }
 
 function draw() {
-  const k = Object.keys(cart).filter(i => P[i]);
-  let n = 0, t = 0;
+  const k = Object.keys(cart).filter((i) => P[i]);
+  let n = 0,
+    t = 0;
 
-  $('#items').innerHTML = k.length ? k.map(i => {
-    n += cart[i]; t += cart[i] * P[i][2];
-    return `<div class="flex items-center gap-3 bg-cr rounded-xl p-3">
+  $("#items").innerHTML = k.length
+    ? k
+        .map((i) => {
+          n += cart[i];
+          t += cart[i] * P[i][2];
+          return `<div class="flex items-center gap-3 bg-cr rounded-xl p-3">
       <span class="text-3xl" aria-hidden="true">${P[i][0]}</span>
       <div class="flex-1 text-sm"><p class="font-bold">${P[i][1]}</p><p class="text-g font-bold">${R(P[i][2])}</p></div>
       <button onclick="chg(${i}, -1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Diminuir quantidade de ${P[i][1]}">−</button>
       <b>${cart[i]}</b>
       <button onclick="chg(${i}, 1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Aumentar quantidade de ${P[i][1]}">+</button>
     </div>`;
-  }).join('') : `<div class="text-center mt-10 text-gd/70"><p class="text-5xl">🐾</p><p class="mt-2">Seu carrinho está vazio.</p><a href="produtos.html" class="btn bg-g text-white mt-4 text-sm">Ver produtos</a></div>`;
+        })
+        .join("")
+    : `<div class="text-center mt-10 text-gd/70"><p class="text-5xl">🐾</p><p class="mt-2">Seu carrinho está vazio.</p><a href="produtos.html" class="btn bg-g text-white mt-4 text-sm">Ver produtos</a></div>`;
 
   const frete = !t || t >= FRETE_GRATIS ? 0 : FRETE;
-  $$('.badge').forEach(b => { b.textContent = n; b.style.display = n ? 'flex' : 'none'; });
-  $('#sub').textContent = R(t);
-  $('#frete').textContent = !t ? '—' : frete ? R(frete) : 'Grátis';
-  $('#total').textContent = R(t + frete);
-  $('#bar').style.width = Math.min(100, (t / FRETE_GRATIS) * 100) + '%';
-  $('#ship').textContent = !t ? `Frete grátis acima de ${R(FRETE_GRATIS)}` : t >= FRETE_GRATIS ? '🎉 Você ganhou frete grátis!' : `Faltam ${R(FRETE_GRATIS - t)} para o frete grátis`;
-  LS.set('ps_cart', cart);
+  $$(".badge").forEach((b) => {
+    b.textContent = n;
+    b.style.display = n ? "flex" : "none";
+  });
+  $("#sub").textContent = R(t);
+  $("#frete").textContent = !t ? "—" : frete ? R(frete) : "Grátis";
+  $("#total").textContent = R(t + frete);
+  $("#bar").style.width = Math.min(100, (t / FRETE_GRATIS) * 100) + "%";
+  $("#ship").textContent = !t
+    ? `Frete grátis acima de ${R(FRETE_GRATIS)}`
+    : t >= FRETE_GRATIS
+      ? "🎉 Você ganhou frete grátis!"
+      : `Faltam ${R(FRETE_GRATIS - t)} para o frete grátis`;
+  LS.set("ps_cart", cart);
 }
 
-const dr = $('#drawer') || null;
+const dr = $("#drawer") || null;
 function openCart(e) {
   if (e) e.preventDefault();
-  $('#drawer').inert = false;
-  $('#drawer').classList.add('open');
-  $('#shade').classList.add('open');
+  $("#drawer").inert = false;
+  $("#drawer").classList.add("open");
+  $("#shade").classList.add("open");
 }
 function closeCart() {
-  $('#drawer').classList.remove('open');
-  $('#shade').classList.remove('open');
-  $('#drawer').inert = true;
+  $("#drawer").classList.remove("open");
+  $("#shade").classList.remove("open");
+  $("#drawer").inert = true;
 }
 
 function checkout() {
-  const k = Object.keys(cart).filter(i => P[i]);
-  if (!k.length) return toast('Seu carrinho está vazio. Adicione um produto 🐾');
+  const k = Object.keys(cart).filter((i) => P[i]);
+  if (!k.length)
+    return toast("Seu carrinho está vazio. Adicione um produto 🐾");
   const u = me();
   if (!u) {
-    LS.set('ps_back', (location.pathname.split('/').pop() || 'index.html') + '#carrinho');
-    toast('Entre na sua conta para finalizar a compra');
-    return setTimeout(() => (location.href = 'conta.html'), 1000);
+    LS.set(
+      "ps_back",
+      (location.pathname.split("/").pop() || "index.html") + "#carrinho",
+    );
+    toast("Entre na sua conta para finalizar a compra");
+    return setTimeout(() => (location.href = "conta.html"), 1000);
   }
   const sub = k.reduce((s, i) => s + cart[i] * P[i][2], 0);
   u.orders.unshift({
     id: String(Date.now()).slice(-6),
-    date: new Date().toLocaleDateString('pt-BR'),
-    items: k.map(i => ({ e: P[i][0], n: P[i][1], q: cart[i] })),
+    date: new Date().toLocaleDateString("pt-BR"),
+    items: k.map((i) => ({ e: P[i][0], n: P[i][1], q: cart[i] })),
     total: sub + (sub >= FRETE_GRATIS ? 0 : FRETE),
-    status: 'Em preparo'
+    status: "Em preparo",
   });
   saveMe(u);
   cart = {};
   draw();
   closeCart();
-  toast('Pedido realizado! Veja em Minha conta 🎉');
+  toast("Pedido realizado! Veja em Minha conta 🎉");
   if (window.renderConta) renderConta();
 }
 
 /* ---------- Menu do cachorro: indicador e animação ---------- */
-const nav = () => $('.menu');
-const gl = () => $('.glider');
-const act = () => $('.menu .item.active') || $('.menu .item');
+const nav = () => $(".menu");
+const gl = () => $(".glider");
+const act = () => $(".menu .item.active") || $(".menu .item");
 let prev = null;
-try { prev = JSON.parse(sessionStorage.getItem('ps_gl')); } catch {}
+try {
+  prev = JSON.parse(sessionStorage.getItem("ps_gl"));
+} catch {}
 if (prev && prev.vw !== innerWidth) prev = null;
-let liberado = !prev;   // enquanto falso, o indicador fica onde estava na página anterior
+let liberado = !prev; // enquanto falso, o indicador fica onde estava na página anterior
 let glSet = false;
-const glSalvar = el => {
+const glSalvar = (el) => {
   glSet = true;
-  try { sessionStorage.setItem('ps_gl', JSON.stringify({ x: el.offsetLeft, w: el.offsetWidth, vw: innerWidth })); } catch {}
+  try {
+    sessionStorage.setItem(
+      "ps_gl",
+      JSON.stringify({ x: el.offsetLeft, w: el.offsetWidth, vw: innerWidth }),
+    );
+  } catch {}
 };
-const mv = el => {
+const mv = (el) => {
   if (!el || !gl()) return;
-  const x = liberado ? el.offsetLeft : prev.x, w = liberado ? el.offsetWidth : prev.w;
+  const x = liberado ? el.offsetLeft : prev.x,
+    w = liberado ? el.offsetWidth : prev.w;
   gl().style.width = `${w}px`;
   gl().style.transform = `translateX(${x}px)`;
 };
 let dogLigar, dogDesligar;
 const who = () => {
-  const u = me(), t = u ? `Minha conta (${first()})` : 'Entrar';
-  $$('.who').forEach(w => { w.title = t; w.setAttribute('aria-label', t); w.classList.toggle('logged', !!u); });
+  const u = me(),
+    t = u ? `Minha conta (${first()})` : "Entrar";
+  $$(".who").forEach((w) => {
+    w.title = t;
+    w.setAttribute("aria-label", t);
+    w.classList.toggle("logged", !!u);
+  });
   mv(act());
 };
 
 function menuSetup() {
-  $$('.menu .item').forEach(i => {
-    i.addEventListener('mouseenter', () => mv(i));
-    i.addEventListener('focus', () => mv(i));
-    i.addEventListener('mouseleave', () => mv(act()));
-    i.addEventListener('blur', () => mv(act()));
+  $$(".menu .item").forEach((i) => {
+    i.addEventListener("mouseenter", () => mv(i));
+    i.addEventListener("focus", () => mv(i));
+    i.addEventListener("mouseleave", () => mv(act()));
+    i.addEventListener("blur", () => mv(act()));
   });
-  window.addEventListener('resize', () => mv(act()));
-  window.addEventListener('load', () => mv(act()));
-  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => mv(act()));
+  window.addEventListener("resize", () => mv(act()));
+  window.addEventListener("load", () => mv(act()));
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() =>
+    mv(act()),
+  );
 
   // cachorro: anima ao passar o mouse e termina o ciclo antes de voltar à imagem parada
-  const dg = $('.dog'), CICLO = 4840;
-  new Image().src = 'assets/images/cachorro-anim.webp';
-  let t0 = 0, to;
-  const ligar = () => { clearTimeout(to); if (!t0) { t0 = performance.now(); dg.classList.add('play'); } };
+  const dg = $(".dog"),
+    CICLO = 4840;
+  new Image().src = "assets/images/cachorro-anim.webp";
+  let t0 = 0,
+    to;
+  const ligar = () => {
+    clearTimeout(to);
+    if (!t0) {
+      t0 = performance.now();
+      dg.classList.add("play");
+    }
+  };
   const desligar = () => {
     if (!t0) return;
     clearTimeout(to);
-    to = setTimeout(() => { dg.classList.remove('play'); t0 = 0; }, CICLO - ((performance.now() - t0) % CICLO));
+    to = setTimeout(
+      () => {
+        dg.classList.remove("play");
+        t0 = 0;
+      },
+      CICLO - ((performance.now() - t0) % CICLO),
+    );
   };
-  dg.addEventListener('mouseenter', ligar);
-  dg.addEventListener('mouseleave', desligar);
-  dg.addEventListener('focusin', ligar);
-  dg.addEventListener('focusout', desligar);
-  dg.addEventListener('touchstart', () => { ligar(); desligar(); }, { passive: true });
-  dogLigar = ligar; dogDesligar = desligar;
-  if (prev) $('.menu').classList.add('chega');
+  dg.addEventListener("mouseenter", ligar);
+  dg.addEventListener("mouseleave", desligar);
+  dg.addEventListener("focusin", ligar);
+  dg.addEventListener("focusout", desligar);
+  dg.addEventListener(
+    "touchstart",
+    () => {
+      ligar();
+      desligar();
+    },
+    { passive: true },
+  );
+  dogLigar = ligar;
+  dogDesligar = desligar;
+  if (prev) $(".menu").classList.add("chega");
 
   // troca de página: conteúdo some suave, indicador desliza até a aba clicada
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href]');
-    if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const h = a.getAttribute('href');
-    if (!h || h[0] === '#' || a.target || /^(https?:|mailto:|tel:)/i.test(h)) return;
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a[href]");
+    if (
+      !a ||
+      e.defaultPrevented ||
+      e.button ||
+      e.metaKey ||
+      e.ctrlKey ||
+      e.shiftKey ||
+      e.altKey
+    )
+      return;
+    const h = a.getAttribute("href");
+    if (!h || h[0] === "#" || a.target || /^(https?:|mailto:|tel:)/i.test(h))
+      return;
     if (new URL(a.href, location.href).pathname === location.pathname) return;
     e.preventDefault();
-    if (a.closest('.menu')) { mv(a); glSalvar(a); }
-    document.documentElement.classList.add('saindo');
-    try { sessionStorage.setItem('ps_nav', '1'); } catch {}
+    if (a.closest(".menu")) {
+      mv(a);
+      glSalvar(a);
+    }
+    document.documentElement.classList.add("saindo");
+    try {
+      sessionStorage.setItem("ps_nav", "1");
+    } catch {}
     setTimeout(() => (location.href = a.href), 240);
   });
-  window.addEventListener('pagehide', () => { if (!glSet && act()) glSalvar(act()); });
-  window.addEventListener('pageshow', e => { if (e.persisted) document.documentElement.classList.remove('saindo'); });
+  window.addEventListener("pagehide", () => {
+    if (!glSet && act()) glSalvar(act());
+  });
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) document.documentElement.classList.remove("saindo");
+  });
 }
 
 /* ---------- Inicialização ---------- */
 layout();
-$$('.js-cart').forEach(a => (a.onclick = openCart));
-$('#closeCart').onclick = closeCart;
-$('#shade').onclick = closeCart;
-$('#checkoutBtn').onclick = checkout;
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCart(); });
+$$(".js-cart").forEach((a) => (a.onclick = openCart));
+$("#closeCart").onclick = closeCart;
+$("#shade").onclick = closeCart;
+$("#checkoutBtn").onclick = checkout;
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeCart();
+});
 menuSetup();
 who();
 draw();
 icons();
 mv(act());
-if (location.hash === '#carrinho') openCart();
+if (location.hash === "#carrinho") openCart();
 
 /* ---------- Mostra a página só quando estiver pronta (evita piscar ao trocar de página) ---------- */
-const imgOk = src => { const i = new Image(); i.src = src; return i.decode ? i.decode().catch(() => {}) : Promise.resolve(); };
+const imgOk = (src) => {
+  const i = new Image();
+  i.src = src;
+  return i.decode ? i.decode().catch(() => {}) : Promise.resolve();
+};
 function mostrar() {
-  const m = $('.menu');
-  document.documentElement.classList.add('ok');
-  if (m) { m.classList.add('ready'); void m.offsetWidth; liberado = true; mv(act()); }
+  const m = $(".menu");
+  document.documentElement.classList.add("ok");
+  if (m) {
+    m.classList.add("ready");
+    void m.offsetWidth;
+    liberado = true;
+    mv(act());
+  }
   // ao chegar de outra página, o cachorro dá uma abanada
   let veio = false;
-  try { veio = sessionStorage.getItem('ps_nav'); sessionStorage.removeItem('ps_nav'); } catch {}
-  if (veio && dogLigar && !matchMedia('(prefers-reduced-motion: reduce)').matches) { dogLigar(); dogDesligar(); }
+  try {
+    veio = sessionStorage.getItem("ps_nav");
+    sessionStorage.removeItem("ps_nav");
+  } catch {}
+  if (
+    veio &&
+    dogLigar &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    dogLigar();
+    dogDesligar();
+  }
 }
 function quandoPronto() {
   Promise.race([
-    Promise.all([document.fonts ? document.fonts.ready : 0, imgOk('assets/images/cachorro-parado.webp'), imgOk('assets/images/petsco-logo.png')]),
-    new Promise(r => setTimeout(r, 1800))
+    Promise.all([
+      document.fonts ? document.fonts.ready : 0,
+      imgOk("assets/images/cachorro-parado.webp"),
+      imgOk("assets/images/petsco-logo.png"),
+    ]),
+    new Promise((r) => setTimeout(r, 1800)),
   ]).then(() => requestAnimationFrame(() => requestAnimationFrame(mostrar)));
 }
-document.readyState === 'complete' ? quandoPronto() : window.addEventListener('load', quandoPronto);
+document.readyState === "complete"
+  ? quandoPronto()
+  : window.addEventListener("load", quandoPronto);
