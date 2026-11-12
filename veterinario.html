@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      document.documentElement.classList.add("js");
+      setTimeout(function () {
+        document.documentElement.classList.add("ok");
+      }, 4000);
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="image" href="assets/images/cachorro-parado.webp" />
+    <link rel="preload" as="image" href="assets/images/petsco-logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Veterinário — Pets’co</title>
+    <meta
+      name="description"
+      content="Consultas, vacinas e exames para cães e gatos."
+    />
+    <link rel="icon" href="assets/images/petsco-logo.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page="vet">
+    <main id="main">
+      <header class="hero pt-h px-4 pb-14 rounded-b-[2.5rem]">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-6">
+          <div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gd">
+              Veterinário de confiança
+            </h1>
+            <p class="mt-3 text-lg text-gd/80 max-w-xl">
+              Cuidamos da saúde do seu pet com profissionais experientes, do
+              filhote ao idoso.
+            </p>
+          </div>
+          <span
+            class="hidden md:block text-[7rem] leading-none fl"
+            aria-hidden="true"
+            >🩺</span
+          >
+        </div>
+      </header>
+      <section class="max-w-6xl mx-auto px-4 py-14">
+        <h2 class="text-3xl font-bold text-gd">Nossos atendimentos</h2>
+        <div
+          id="vetsvc"
+          class="grid sm:grid-cols-2 md:grid-cols-3 gap-5 mt-6"
+        ></div>
+        <div
+          class="mt-8 rounded-2xl bg-or/15 border-2 border-or p-5 flex flex-wrap items-center gap-4"
+        >
+          <i data-lucide="siren" class="w-9 h-9 text-or"></i>
+          <div class="flex-1">
+            <p class="font-bold text-gd">Urgência com seu pet?</p>
+            <p class="text-sm text-gd/80">
+              Ligue agora para (19) 0000-0000 e avise que está a caminho.
+            </p>
+          </div>
+          <a href="tel:+551900000000" class="btn bg-or text-white text-sm"
+            >Ligar agora</a
+          >
+        </div>
+      </section>
+
+      <section class="bg-gl py-14 px-4">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold text-gd text-center">Nossa equipe</h2>
+          <div id="equipe" class="grid sm:grid-cols-3 gap-6 mt-8"></div>
+        </div>
+      </section>
+
+      <section id="agendar" class="max-w-3xl mx-auto px-4 py-16">
+        <div class="card p-6 md:p-8">
+          <h2 class="text-3xl font-bold text-gd text-center">
+            Marcar consulta
+          </h2>
+          <p class="text-center text-gd/70 mt-1 mb-6">
+            Atendimento de seg a sáb, com horário marcado.
+          </p>
+          <div id="book"></div>
+        </div>
+      </section>
+    </main>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script src="pages.js"></script>
+  </body>
+</html>
