@@ -21,6 +21,38 @@ const LS = {
   },
 };
 
+/* ---------- Fotos dos produtos ---------- */
+// foto pode ser: nome-sem-extensão (procura em assets/produtos/ como .jpg, .webp, .png ou .jpeg),
+// um caminho com extensão, ou uma foto enviada pelo painel do administrador (data:).
+const EXTS = ["jpg", "webp", "png", "jpeg"];
+const FOTO_DIRETA = /^data:|\.(jpe?g|png|webp|gif|avif)$/i;
+const fotoSrc = (f, t = 0) =>
+  !f
+    ? ""
+    : FOTO_DIRETA.test(f)
+      ? t
+        ? ""
+        : f
+      : EXTS[t]
+        ? `assets/produtos/${f}.${EXTS[t]}`
+        : "";
+function fotoErr(img) {
+  const t = +img.dataset.t + 1,
+    s = fotoSrc(img.dataset.f, t);
+  if (s) {
+    img.dataset.t = t;
+    img.src = s;
+  } else img.remove(); // sem foto: aparece o emoji
+}
+const PATINHA =
+  '<span class="pph"><svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="16" cy="28" r="6"/><circle cx="26" cy="17" r="6"/><circle cx="38" cy="17" r="6"/><circle cx="48" cy="28" r="6"/></svg></span>';
+const fotoBox = (f, n = "") => {
+  const s = fotoSrc(f),
+    base = s && !FOTO_DIRETA.test(f);
+  return `${PATINHA}${s ? `<img src="${s}" alt="${n}" loading="lazy"${base ? ` data-f="${f}" data-t="0" onerror="fotoErr(this)"` : ' onerror="this.remove()"'} onload="this.parentNode.classList.add('tem')">` : ""}`;
+};
+const fotoHTML = (i) => fotoBox(P[i][6], P[i][1]);
+
 /* ---------- Conta (demonstrativo: dados ficam só neste navegador) ---------- */
 const hash = (s) => {
   let h = 0;
@@ -200,7 +232,7 @@ let cart = LS.get("ps_cart", {});
 const card = (i) => {
   const [e, n, v, c] = P[i];
   return `<article class="card p-5 text-center flex flex-col">
-    <div class="text-6xl bg-cr rounded-2xl py-6" aria-hidden="true">${e}</div>
+    <div class="pimg" aria-hidden="true">${fotoHTML(i)}</div>
     <p class="text-xs font-bold text-g mt-3">${c}</p>
     <h3 class="font-semibold leading-tight mt-1 flex-1">${n}</h3>
     <p class="t text-xl font-bold text-g mt-1">${R(v)}</p>
@@ -238,7 +270,7 @@ function draw() {
           n += cart[i];
           t += cart[i] * P[i][2];
           return `<div class="flex items-center gap-3 bg-cr rounded-xl p-3">
-      <span class="text-3xl" aria-hidden="true">${P[i][0]}</span>
+      <span class="pimg thumb" aria-hidden="true">${fotoHTML(i)}</span>
       <div class="flex-1 text-sm"><p class="font-bold">${P[i][1]}</p><p class="text-g font-bold">${R(P[i][2])}</p></div>
       <button onclick="chg(${i}, -1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Diminuir quantidade de ${P[i][1]}">−</button>
       <b>${cart[i]}</b>

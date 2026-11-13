@@ -1,0 +1,33 @@
+FOTOS DOS PRODUTOS
+
+Tamanho ideal: QUADRADA, 800 x 800 pixels (proporção 1:1).
+Formato: JPG, WEBP ou PNG, de preferência com menos de 150 KB cada.
+Enquadre o produto no centro, com uma folga em volta, de preferência em fundo
+claro ou branco. Se a foto não for quadrada, o site corta o centro dela.
+
+Salve cada foto com EXATAMENTE o nome abaixo (a extensão pode ser .jpg, .webp ou .png):
+
+  racao-premium-10kg
+  petisco-ossinho
+  bolinha-mordedor
+  caminha-confort
+  shampoo-neutro
+  coleira-e-guia
+  sache-gatos-12un
+  pelucia-sonora
+  racao-gatos-castrados-3kg
+  varinha-com-penas
+  areia-higienica-4kg
+  escova-tira-pelos
+  comedouro-antiformiga
+  bifinho-de-frango
+  arranhador-compacto
+  fonte-de-agua
+
+Exemplo: assets/produtos/racao-premium-10kg.jpg
+
+A mesma foto aparece na loja, no carrinho e na página do produto.
+
+Produtos novos criados no painel do administrador: a foto é enviada pelo próprio
+painel (campo "Foto do produto"), e o site já corta e reduz para o tamanho certo.
+Enquanto um produto não tiver foto, o site mostra uma patinha no lugar.
