@@ -209,6 +209,13 @@ const pg = {
       ["pedidos", "package", "Pedidos"],
       ["dados", "settings", "Meus dados"],
     ];
+    const ADM = [
+      ["adm_resumo", "trending-up", "Visão geral"],
+      ["adm_agenda", "calendar-range", "Todos os agendamentos"],
+      ["adm_pedidos", "clipboard-list", "Todos os pedidos"],
+      ["adm_clientes", "users", "Clientes"],
+    ];
+    const OST = ["Em preparo", "Enviado", "Entregue", "Cancelado"];
     const esc = (s) =>
       String(s ?? "").replace(
         /[&<>"']/g,
@@ -221,8 +228,16 @@ const pg = {
             "'": "&#39;",
           })[c],
       );
+    const todos = () => Object.values(Users());
+    const apptsAll = () =>
+      todos().flatMap((c) => c.appts.map((a) => ({ ...a, c })));
+    const ordersAll = () =>
+      todos().flatMap((c) => c.orders.map((o) => ({ ...o, c })));
+    const cmpAg = (a, b) => (a.data + a.hora).localeCompare(b.data + b.hora);
     const feitoTag =
       '<span class="bg-gl text-gd text-xs font-bold rounded-full px-2 py-0.5 ml-1">Concluído</span>';
+    const vazioAdm = (msg) =>
+      `<div class="card p-8 text-center text-gd/70"><p class="text-5xl">📭</p><p class="mt-2">${msg}</p></div>`;
 
     const auth = () => {
       const login = tab === "login";
@@ -260,8 +275,35 @@ const pg = {
         const em = g("email").toLowerCase(),
           all = Users();
         if (login) {
-          if (!all[em] || all[em].pass !== hash(g("senha")))
-            return erro("E-mail ou senha incorretos. Confira e tente de novo.");
+          if (em === ADMIN_LOGIN && hash(g("senha")) === hash(ADMIN_PASS)) {
+            // acesso do administrador: login e senha definidos em data.js
+            if (!all[em])
+              saveMe({
+                name: "Administrador",
+                email: ADMIN_LOGIN,
+                phone: "",
+                pass: hash(ADMIN_PASS),
+                role: "admin",
+                pets: [],
+                orders: [],
+                appts: [],
+              });
+            else if (all[em].role !== "admin") {
+              all[em].role = "admin";
+              saveMe(all[em]);
+            }
+            sec = "adm_resumo";
+          } else {
+            if (
+              !all[em] ||
+              em === ADMIN_LOGIN ||
+              all[em].pass !== hash(g("senha"))
+            )
+              return erro(
+                "E-mail ou senha incorretos. Confira e tente de novo.",
+              );
+            if (all[em].role === "admin") sec = "adm_resumo";
+          }
         } else {
           if (all[em])
             return erro("Este e-mail já tem cadastro. Use a aba Entrar.");
@@ -285,13 +327,71 @@ const pg = {
           return;
         }
         toast(
-          login ? "Bem-vindo de volta! 🐶" : "Conta criada com sucesso! 🎉",
+          login
+            ? em === ADMIN_LOGIN
+              ? "Painel do administrador liberado 🛡️"
+              : "Bem-vindo de volta! 🐶"
+            : "Conta criada com sucesso! 🎉",
         );
         renderConta();
       };
     };
 
     const painel = {
+      adm_resumo: () => {
+        const cl = todos(),
+          ap = apptsAll(),
+          od = ordersAll(),
+          hoje = new Date().toISOString().slice(0, 10);
+        const receita = od
+          .filter((o) => o.status !== "Cancelado")
+          .reduce((s, o) => s + o.total, 0);
+        const prox = ap
+          .filter((a) => a.data >= hoje && !a.feito)
+          .sort(cmpAg)
+          .slice(0, 5);
+        const ult = od.sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 5);
+        const kpis = [
+          [cl.filter((c) => c.role !== "admin").length, "clientes"],
+          [cl.reduce((s, c) => s + c.pets.length, 0), "pets"],
+          [ap.length, "agendamentos"],
+          [od.length, "pedidos"],
+          [R(receita), "em vendas"],
+        ];
+        return `<h2 class="text-2xl font-bold text-gd">Painel do administrador 🛡️</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-5">${kpis.map(([n, l]) => `<div class="card p-4 text-center"><p class="t text-2xl font-bold text-g">${n}</p><p class="text-xs">${l}</p></div>`).join("")}</div>
+          <div class="grid md:grid-cols-2 gap-5 mt-5">
+            <div class="card p-6"><h3 class="font-semibold text-lg">Próximos agendamentos</h3>${prox.map((a) => `<p class="mt-2 text-sm"><b>${fmtData(a.data)} ${esc(a.hora)}</b> • ${esc(a.svc)} — ${esc(a.pet)}<br><span class="text-gd/70">${esc(a.c.name)}</span></p>`).join("") || '<p class="mt-2 text-gd/70">Nada marcado.</p>'}</div>
+            <div class="card p-6"><h3 class="font-semibold text-lg">Últimos pedidos</h3>${ult.map((o) => `<p class="mt-2 text-sm"><b>Nº ${esc(o.id)}</b> • ${R(o.total)} • ${esc(o.status)}<br><span class="text-gd/70">${esc(o.c.name)}</span></p>`).join("") || '<p class="mt-2 text-gd/70">Nenhum pedido.</p>'}</div>
+          </div>`;
+      },
+      adm_agenda: () =>
+        `<h2 class="text-2xl font-bold text-gd">Todos os agendamentos</h2><div class="space-y-3 mt-5">${
+          apptsAll()
+            .sort(cmpAg)
+            .map(
+              (a) =>
+                `<div class="card p-5 flex flex-wrap items-center gap-4"><div class="flex-1" style="min-width:200px"><p class="font-bold">${esc(a.svc)} — ${esc(a.pet)}${a.feito ? feitoTag : ""}</p><p class="text-sm text-gd/70">${esc(a.tipo)} • ${fmtData(a.data)} às ${esc(a.hora)}</p><p class="text-sm mt-1">👤 ${esc(a.c.name)} • ${esc(a.c.phone || "sem telefone")}</p></div>${a.feito ? "" : `<button data-a="adm_done" data-e="${esc(a.c.email)}" data-id="${a.id}" class="btn bg-g text-white text-sm px-4 py-2">Concluir</button>`}<button data-a="adm_cancel" data-e="${esc(a.c.email)}" data-id="${a.id}" class="text-red-700 text-sm font-bold">Cancelar</button></div>`,
+            )
+            .join("") || vazioAdm("Nenhum agendamento ainda.")
+        }</div>`,
+      adm_pedidos: () =>
+        `<h2 class="text-2xl font-bold text-gd">Todos os pedidos</h2><div class="space-y-3 mt-5">${
+          ordersAll()
+            .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+            .map(
+              (o) =>
+                `<div class="card p-5"><div class="flex justify-between flex-wrap gap-2 items-center"><p class="font-bold">Pedido nº ${esc(o.id)} <span class="text-sm font-normal text-gd/70">• ${esc(o.date)}</span></p><select class="inp" style="width:auto" data-ost data-e="${esc(o.c.email)}" data-id="${esc(o.id)}" aria-label="Status do pedido ${esc(o.id)}">${OST.map((s) => `<option${s === o.status ? " selected" : ""}>${s}</option>`).join("")}</select></div><p class="text-sm mt-1">👤 ${esc(o.c.name)} • ${esc(o.c.phone || "sem telefone")}</p><p class="mt-2 text-sm">${o.items.map((x) => `${x.q}× ${esc(x.n)}`).join("<br>")}</p><p class="t font-bold text-g mt-2">${R(o.total)}</p></div>`,
+            )
+            .join("") || vazioAdm("Nenhum pedido ainda.")
+        }</div>`,
+      adm_clientes: (u) =>
+        `<h2 class="text-2xl font-bold text-gd">Clientes e administradores</h2><div class="space-y-3 mt-5">${todos()
+          .map(
+            (c) =>
+              `<div class="card p-5 flex flex-wrap items-center gap-4"><div class="flex-1" style="min-width:200px"><p class="font-bold">${esc(c.name)} ${c.role === "admin" ? '<span class="bg-or text-white text-xs font-bold rounded-full px-2 py-0.5 ml-1">Admin</span>' : ""}</p><p class="text-sm text-gd/70 break-all">${esc(c.email)} • ${esc(c.phone || "sem telefone")}</p><p class="text-xs text-gd/60 mt-1">${c.pets.length} pets • ${c.appts.length} agendamentos • ${c.orders.length} pedidos</p></div>${c.email === ADMIN_LOGIN ? '<span class="text-xs text-gd/60">Conta principal</span>' : c.email === u.email ? '<span class="text-xs text-gd/60">Você</span>' : `<button data-a="adm_role" data-e="${esc(c.email)}" class="btn bg-white text-gd text-sm px-4 py-2 shadow-[0_4px_0_#cfe39a]">${c.role === "admin" ? "Remover admin" : "Tornar admin"}</button><button data-a="adm_del" data-e="${esc(c.email)}" class="text-red-700 text-sm font-bold">Excluir</button>`}</div>`,
+          )
+          .join("")}</div>`,
       resumo: (u) => {
         const prox = u.appts
           .filter((a) => a.data >= new Date().toISOString().slice(0, 10))
@@ -325,16 +425,18 @@ const pg = {
         <form id="df" class="card p-6 mt-5 grid sm:grid-cols-2 gap-4">${campo("dn", "Nome", "text", `required value="${u.name}"`)}${campo("dt", "WhatsApp", "tel", `value="${u.phone || ""}"`)}
           <div class="sm:col-span-2"><label class="lbl" for="de">E-mail</label><input class="inp" id="de" value="${u.email}" disabled></div>
           <button class="btn bg-g text-white justify-center sm:col-span-2">Salvar alterações</button></form>
-        <button data-a="delconta" class="mt-6 text-sm font-bold text-red-700 underline">Excluir minha conta</button>`,
+        ${u.email === ADMIN_LOGIN ? "" : '<button data-a="delconta" class="mt-6 text-sm font-bold text-red-700 underline">Excluir minha conta</button>'}`,
     };
 
     const dash = () => {
-      const u = me();
+      const u = me(),
+        isAdm = u.role === "admin";
+      if (sec.startsWith("adm_") && !isAdm) sec = "resumo";
       const sbtn = ([k, ic, t]) =>
         `<button class="snav${k === sec ? " on" : ""}" data-s="${k}"><i data-lucide="${ic}" class="w-4 h-4"></i>${t}</button>`;
       root.innerHTML = `<div class="grid md:grid-cols-4 gap-6 items-start">
-        <aside class="card p-4"><div class="text-center py-3"><div class="text-5xl" aria-hidden="true">🐾</div><p class="t font-bold text-xl text-gd mt-1">${esc(u.name)}</p><p class="text-xs text-gd/60 break-all">${esc(u.email)}</p></div>
-          <nav class="grid gap-1">${SEC.map(sbtn).join("")}
+        <aside class="card p-4"><div class="text-center py-3"><div class="text-5xl" aria-hidden="true">${isAdm ? "🛡️" : "🐾"}</div><p class="t font-bold text-xl text-gd mt-1">${esc(u.name)}</p><p class="text-xs text-gd/60 break-all">${esc(u.email)}</p>${isAdm ? '<span class="inline-block mt-2 text-xs font-bold bg-or text-white rounded-full px-3 py-1">Administrador</span>' : ""}</div>
+          <nav class="grid gap-1">${SEC.map(sbtn).join("")}${isAdm ? `<p class="text-xs font-bold uppercase text-gd/50 px-3 pt-3">Administração</p>${ADM.map(sbtn).join("")}` : ""}
           <button class="snav text-red-700" data-a="sair"><i data-lucide="log-out" class="w-4 h-4"></i>Sair</button></nav></aside>
         <section class="md:col-span-3" id="panel">${painel[sec](u)}</section></div>`;
       $$("[data-s]").forEach(
@@ -349,6 +451,7 @@ const pg = {
       p.onclick = (e) => {
         const b = e.target.closest("[data-a]");
         if (!b) return;
+        if (b.dataset.a.startsWith("adm_")) return admAcao(b);
         const x = me(),
           i = +b.dataset.i;
         if (b.dataset.a === "delpet") x.pets.splice(i, 1);
@@ -368,6 +471,63 @@ const pg = {
         saveMe(x);
         dash();
         icons();
+      };
+      // ações restritas ao administrador (sempre confere o perfil antes)
+      const admAcao = (b) => {
+        const adm = me();
+        if (!adm || adm.role !== "admin")
+          return toast("Acesso restrito a administradores");
+        const acao = b.dataset.a;
+        const all = Users(),
+          c = all[b.dataset.e],
+          id = +b.dataset.id;
+        if (!c) return;
+        if (acao === "adm_done") {
+          const ap = c.appts.find((x) => x.id === id);
+          if (ap) ap.feito = true;
+          toast("Agendamento concluído ✅");
+        }
+        if (acao === "adm_cancel") {
+          c.appts = c.appts.filter((x) => x.id !== id);
+          toast("Agendamento cancelado");
+        }
+        if (acao === "adm_role") {
+          if (c.email === adm.email) return;
+          c.role = c.role === "admin" ? "tutor" : "admin";
+          toast(
+            c.role === "admin"
+              ? `${c.name.split(" ")[0]} agora é administrador 🛡️`
+              : "Acesso de administrador removido",
+          );
+        }
+        if (acao === "adm_del") {
+          if (
+            c.email === adm.email ||
+            !confirm(`Excluir a conta de ${c.name} e todos os dados dela?`)
+          )
+            return;
+          delete all[c.email];
+          LS.set("ps_users", all);
+          dash();
+          icons();
+          return;
+        }
+        saveMe(c);
+        dash();
+        icons();
+      };
+      p.onchange = (e) => {
+        const s = e.target;
+        if (!s.hasAttribute("data-ost")) return;
+        const adm = me();
+        if (!adm || adm.role !== "admin")
+          return toast("Acesso restrito a administradores");
+        const c = Users()[s.dataset.e],
+          o = c && c.orders.find((x) => x.id === s.dataset.id);
+        if (!o) return;
+        o.status = s.value;
+        saveMe(c);
+        toast("Status do pedido atualizado");
       };
       p.onsubmit = (e) => {
         e.preventDefault();

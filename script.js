@@ -298,6 +298,7 @@ function checkout() {
     items: k.map((i) => ({ e: P[i][0], n: P[i][1], q: cart[i] })),
     total: sub + (sub >= FRETE_GRATIS ? 0 : FRETE),
     status: "Em preparo",
+    ts: Date.now(),
   });
   saveMe(u);
   cart = {};
