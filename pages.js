@@ -183,6 +183,15 @@ const pg = {
     bookingForm("vet");
   },
 
+  /* ---------- SOBRE: formulário de contato ---------- */
+  sobre() {
+    $("#contato").onsubmit = (e) => {
+      e.preventDefault();
+      e.target.reset();
+      toast("Mensagem enviada! Respondemos em até 1 dia útil 💚");
+    };
+  },
+
   /* ---------- CONTA: entrar, cadastrar e painel do tutor ---------- */
   conta() {
     let tab = "login",
