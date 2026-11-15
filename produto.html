@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      document.documentElement.classList.add("js");
+      setTimeout(function () {
+        document.documentElement.classList.add("ok");
+      }, 4000);
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="image" href="assets/images/cachorro-parado.webp" />
+    <link rel="preload" as="image" href="assets/images/petsco-logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Produto — Pets’co</title>
+    <meta
+      name="description"
+      content="Detalhes do produto, preço e opção de adicionar ao carrinho."
+    />
+    <link rel="icon" href="assets/images/petsco-logo.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="tailwind.config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page="produto">
+    <main id="main">
+      <section
+        id="produto"
+        class="max-w-6xl mx-auto px-4 pt-h pb-16 min-h-[60vh]"
+      ></section>
+    </main>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script src="pages.js"></script>
+  </body>
+</html>

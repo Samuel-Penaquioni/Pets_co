@@ -1330,3 +1330,63 @@ html.saindo .wpp {
 .pimg.thumb .pph svg {
   width: 55%;
 }
+
+/* ========================================
+   PÁGINA DO PRODUTO
+======================================== */
+.plink:hover {
+  color: #678d3c;
+  text-decoration: underline;
+}
+.card .pimg img {
+  transition: transform 0.35s;
+}
+.card:hover .pimg img {
+  transform: scale(1.05);
+}
+.pfoto {
+  border-radius: 1.5rem;
+  box-shadow: 0 6px 0 #dcebb0;
+}
+.pfoto .pph svg {
+  width: 22%;
+}
+.qtd {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fff;
+  border: 2px solid #e6f5b0;
+  border-radius: 999px;
+  padding: 0.2rem;
+}
+.qtd button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e6f5b0;
+  color: #3f5a22;
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.qtd button:hover {
+  background: #d4ec8e;
+}
+.qtd b {
+  min-width: 2rem;
+  text-align: center;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.1rem;
+}
+.pbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #e6f5b0;
+  color: #3f5a22;
+}

@@ -1,6 +1,14 @@
 /* pages.js — lógica de cada página (escolhida por <body data-page="...">) */
 
 const fmtData = (d) => d.split("-").reverse().join("/");
+const escH = (s) =>
+  String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 
 const plano = (b, sz, teaser) => `
   <div class="card p-7 relative${b.hot ? " ring-4 ring-g" : ""}">
@@ -148,6 +156,76 @@ const pg = {
       render();
     };
     render();
+  },
+
+  /* ---------- PÁGINA DO PRODUTO: detalhes, quantidade e relacionados ---------- */
+  produto() {
+    const box = $("#produto"),
+      id = Number(new URLSearchParams(location.search).get("id")),
+      pr = P[id];
+    if (!pr || !Number.isInteger(id)) {
+      box.innerHTML = `<div class="card p-10 text-center"><p class="t text-2xl font-bold text-gd">Produto não encontrado</p><p class="mt-2 text-gd/70">Ele pode ter saído da loja.</p><a href="produtos.html" class="btn bg-g text-white mt-5">Ver todos os produtos</a></div>`;
+      return;
+    }
+    const [, n, v, c, pt, , , desc, car] = pr;
+    document.title = `${n} — Pets’co`;
+    const para = pt === "Ambos" ? "Cães e gatos" : pt;
+    const itens = (car || "")
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const ids = P.map((_, i) => i).filter((i) => i !== id);
+    const rel = [
+      ...ids.filter((i) => P[i][3] === c),
+      ...ids.filter(
+        (i) => P[i][3] !== c && (P[i][4] === pt || P[i][4] === "Ambos"),
+      ),
+    ].slice(0, 4);
+    const frete =
+      v >= FRETE_GRATIS
+        ? "Frete grátis para este produto"
+        : `Frete grátis em compras acima de ${R(FRETE_GRATIS)}`;
+    box.innerHTML = `
+      <nav class="text-sm text-gd/70 mb-6" aria-label="Você está em"><a class="hover:underline" href="index.html">Início</a> › <a class="hover:underline" href="produtos.html">Produtos</a> › <span class="font-bold text-gd">${escH(n)}</span></nav>
+      <div class="grid md:grid-cols-2 gap-10 items-start">
+        <div class="pimg pfoto" aria-hidden="true">${fotoHTML(id)}</div>
+        <div>
+          <div class="flex flex-wrap gap-2"><span class="pbadge">${escH(c)}</span><span class="pbadge">${escH(para)}</span></div>
+          <h1 class="text-3xl md:text-4xl font-bold text-gd mt-3 leading-tight">${escH(n)}</h1>
+          <p class="t text-4xl font-bold text-g mt-3">${R(v)}</p>
+          <p class="text-sm text-gd/70 mt-1">${escH(frete)}</p>
+          <div class="flex flex-wrap items-center gap-4 mt-6">
+            <div class="qtd" role="group" aria-label="Quantidade"><button type="button" data-q="-1" aria-label="Diminuir quantidade">−</button><b id="qv" aria-live="polite">1</b><button type="button" data-q="1" aria-label="Aumentar quantidade">+</button></div>
+            <button id="addp" class="btn bg-g text-white shadow-[0_5px_0_#3f5a22]"><i data-lucide="shopping-cart" class="w-5 h-5"></i>Adicionar ao carrinho</button>
+          </div>
+          ${desc ? `<h2 class="text-xl font-bold text-gd mt-8">Sobre o produto</h2><p class="mt-2 text-gd/85 leading-relaxed">${escH(desc)}</p>` : ""}
+          ${itens.length ? `<h2 class="text-xl font-bold text-gd mt-6">Características</h2><ul class="mt-2 space-y-2">${itens.map((x) => `<li class="flex gap-2 text-gd/85"><i data-lucide="check" class="w-5 h-5 text-g shrink-0"></i><span>${escH(x)}</span></li>`).join("")}</ul>` : ""}
+          <div class="grid sm:grid-cols-3 gap-3 mt-8">
+            <div class="card p-4 text-center text-sm"><i data-lucide="truck" class="w-7 h-7 mx-auto text-g"></i><p class="font-semibold mt-1">Entrega rápida</p></div>
+            <div class="card p-4 text-center text-sm"><i data-lucide="shield-check" class="w-7 h-7 mx-auto text-g"></i><p class="font-semibold mt-1">Produto selecionado</p></div>
+            <a class="card p-4 text-center text-sm" href="https://wa.me/5519000000000?text=${encodeURIComponent("Olá! Tenho uma dúvida sobre: " + n)}" target="_blank" rel="noopener"><i data-lucide="message-circle" class="w-7 h-7 mx-auto text-g"></i><p class="font-semibold mt-1">Tirar dúvidas</p></a>
+          </div>
+        </div>
+      </div>
+      ${rel.length ? `<h2 class="text-2xl font-bold text-gd mt-16">Você também pode gostar</h2><div class="grid grid-cols-2 md:grid-cols-4 gap-5 mt-5">${rel.map(card).join("")}</div>` : ""}`;
+    let q = 1;
+    $$(".qtd button").forEach(
+      (b) =>
+        (b.onclick = () => {
+          q = Math.max(1, Math.min(20, q + Number(b.dataset.q)));
+          $("#qv").textContent = q;
+        }),
+    );
+    $("#addp").onclick = () => {
+      cart[id] = (cart[id] || 0) + q;
+      draw();
+      toast(`${q}× ${n} no carrinho 🛒`);
+      $$(".badge").forEach((b) => {
+        b.classList.remove("pop");
+        void b.offsetWidth;
+        b.classList.add("pop");
+      });
+    };
   },
 
   /* ---------- BANHO E TOSA: preço por porte + agendamento ---------- */

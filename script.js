@@ -101,7 +101,7 @@ const NAV = [
 function layout() {
   const items = NAV.map(([h, ic, t, k]) => {
     const ico = k === "conta" || k === "cart";
-    return `<a href="${h}" class="item${ico ? " ico" : ""}${k === PAGE ? " active" : ""}${k === "cart" ? " js-cart" : ""}${k === "conta" ? " who" : ""}" data-k="${k}"${ico ? ` aria-label="${t}" title="${t}"` : ""}>
+    return `<a href="${h}" class="item${ico ? " ico" : ""}${k === (PAGE === "produto" ? "produtos" : PAGE) ? " active" : ""}${k === "cart" ? " js-cart" : ""}${k === "conta" ? " who" : ""}" data-k="${k}"${ico ? ` aria-label="${t}" title="${t}"` : ""}>
       <i data-lucide="${ic}"></i>${ico ? "" : `<span>${t}</span>`}${k === "cart" ? '<span class="badge">0</span>' : ""}
     </a>`;
   }).join("");
@@ -232,9 +232,9 @@ let cart = LS.get("ps_cart", {});
 const card = (i) => {
   const [e, n, v, c] = P[i];
   return `<article class="card p-5 text-center flex flex-col">
-    <div class="pimg" aria-hidden="true">${fotoHTML(i)}</div>
+    <a href="produto.html?id=${i}" class="block" tabindex="-1" aria-hidden="true"><div class="pimg">${fotoHTML(i)}</div></a>
     <p class="text-xs font-bold text-g mt-3">${c}</p>
-    <h3 class="font-semibold leading-tight mt-1 flex-1">${n}</h3>
+    <h3 class="font-semibold leading-tight mt-1 flex-1"><a href="produto.html?id=${i}" class="plink">${n}</a></h3>
     <p class="t text-xl font-bold text-g mt-1">${R(v)}</p>
     <button onclick="add(${i})" class="btn bg-g text-white mt-3 text-sm px-4 py-2 w-full justify-center" aria-label="Adicionar ${n} ao carrinho">
       <i data-lucide="shopping-cart" class="w-4 h-4"></i>Adicionar
@@ -326,11 +326,11 @@ function checkout() {
   const sub = k.reduce((s, i) => s + cart[i] * P[i][2], 0);
   u.orders.unshift({
     id: String(Date.now()).slice(-6),
+    ts: Date.now(),
     date: new Date().toLocaleDateString("pt-BR"),
     items: k.map((i) => ({ e: P[i][0], n: P[i][1], q: cart[i] })),
     total: sub + (sub >= FRETE_GRATIS ? 0 : FRETE),
     status: "Em preparo",
-    ts: Date.now(),
   });
   saveMe(u);
   cart = {};
