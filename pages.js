@@ -480,7 +480,7 @@ const pg = {
             <div class="sm:col-span-2 flex flex-wrap items-center gap-4"><div id="xprev" class="pimg" style="width:96px;flex:none">${fotoBox(cur)}</div><div><label class="lbl" for="xf">Foto do produto</label><input type="file" id="xf" accept="image/*" class="text-sm"><p class="text-xs text-gd/60 mt-1">Ideal: quadrada, 800 × 800 px. O centro da imagem é cortado automaticamente.</p><button type="button" id="xrm" class="text-xs font-bold text-red-700 underline mt-1">Remover foto</button></div></div>
             <label class="flex items-center gap-3 font-bold text-gd self-end"><input type="checkbox" id="xd" class="w-5 h-5" style="accent-color:#678d3c"${e && e[5] ? " checked" : ""}>Mostrar em destaque na página inicial</label>
             <div class="sm:col-span-2 flex flex-wrap gap-3"><button class="btn bg-g text-white justify-center">${e ? "Salvar alterações" : "Adicionar produto"}</button>${e ? '<button type="button" data-a="adm_pcancel" class="btn bg-white text-gd shadow-[0_4px_0_#cfe39a]">Cancelar edição</button>' : ""}</div></form>
-          <div class="flex flex-wrap justify-between items-center gap-2 mt-8"><h3 class="font-semibold text-lg">${P.length} ${P.length === 1 ? "produto" : "produtos"}</h3><button data-a="adm_preset" class="text-sm font-bold text-red-700 underline">Restaurar catálogo original</button></div>
+          <div class="flex flex-wrap justify-between items-center gap-2 mt-8"><h3 class="font-semibold text-lg">${P.length} ${P.length === 1 ? "produto" : "produtos"}</h3></div>
           <div class="space-y-3 mt-3">${P.map(([, n, v, c, pt, d, f], i) => `<div class="card p-4 flex flex-wrap items-center gap-4${i === pedit ? " ring-4 ring-g" : ""}"><span class="pimg thumb" aria-hidden="true">${fotoBox(f, esc(n))}</span><div class="flex-1" style="min-width:160px"><p class="font-bold">${esc(n)}${d ? ' <span class="bg-gl text-gd text-xs font-bold rounded-full px-2 py-0.5 ml-1">Destaque</span>' : ""}</p><p class="text-sm text-gd/70">${esc(c)} • ${esc(pt)} • <b class="text-g">${R(v)}</b></p></div><a href="produto.html?id=${i}" class="text-sm font-bold text-g underline">Ver página</a><button data-a="adm_pedit" data-i="${i}" class="btn bg-white text-gd text-sm px-4 py-2 shadow-[0_4px_0_#cfe39a]">Editar</button><button data-a="adm_pdel" data-i="${i}" class="text-red-700 text-sm font-bold">Excluir</button></div>`).join("") || vazioAdm("Nenhum produto cadastrado.")}</div>`;
       },
       adm_clientes: (u) =>
@@ -658,23 +658,6 @@ const pg = {
           saveProds();
           draw();
           toast("Produto excluído");
-          dash();
-          icons();
-          return;
-        }
-        if (acao === "adm_preset") {
-          if (
-            !confirm(
-              "Voltar ao catálogo original? Suas alterações nos produtos serão perdidas.",
-            )
-          )
-            return;
-          resetProds();
-          cart = {};
-          pedit = -1;
-          pfoto = null;
-          draw();
-          toast("Catálogo original restaurado");
           dash();
           icons();
           return;
