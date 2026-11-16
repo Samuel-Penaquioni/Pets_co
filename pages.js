@@ -273,7 +273,9 @@ const pg = {
   /* ---------- CONTA: entrar, cadastrar e painel do tutor ---------- */
   conta() {
     let tab = "login",
-      sec = "resumo";
+      sec = "resumo",
+      pedit = -1,
+      pfoto = null; // pfoto: null = sem mudança, '' = remover, texto = nova foto
     const root = $("#conta");
     const campo = (id, l, t = "text", x = "") =>
       `<div><label class="lbl" for="${id}">${l}</label><input class="inp" id="${id}" name="${id}" type="${t}" ${x}></div>`;
@@ -291,6 +293,7 @@ const pg = {
       ["adm_resumo", "trending-up", "Visão geral"],
       ["adm_agenda", "calendar-range", "Todos os agendamentos"],
       ["adm_pedidos", "clipboard-list", "Todos os pedidos"],
+      ["adm_produtos", "store", "Produtos"],
       ["adm_clientes", "users", "Clientes"],
     ];
     const OST = ["Em preparo", "Enviado", "Entregue", "Cancelado"];
@@ -463,6 +466,23 @@ const pg = {
             )
             .join("") || vazioAdm("Nenhum pedido ainda.")
         }</div>`,
+      adm_produtos: () => {
+        const e = pedit >= 0 ? P[pedit] : null;
+        const cur = pfoto !== null ? pfoto : (e && e[6]) || "";
+        return `<h2 class="text-2xl font-bold text-gd">Produtos da loja</h2>
+          <form id="prf" class="card p-6 mt-5 grid sm:grid-cols-2 gap-4"><h3 class="font-semibold text-lg sm:col-span-2">${e ? "Editar produto" : "Adicionar produto"}</h3>
+            ${campo("xn", "Nome", "text", `required maxlength="60" value="${esc(e ? e[1] : "")}"`)}
+            ${campo("xp", "Preço (R$)", "number", `required min="0.01" step="0.01" value="${e ? e[2] : ""}"`)}
+            <div><label class="lbl" for="xc">Categoria</label><input class="inp" id="xc" name="xc" list="xcl" required maxlength="30" value="${esc(e ? e[3] : "")}"><datalist id="xcl">${CATS.map((c) => `<option value="${esc(c)}">`).join("")}</datalist></div>
+            <div><label class="lbl" for="xt">Para quem?</label><select class="inp" id="xt">${["Cães", "Gatos", "Ambos"].map((x) => `<option${e && e[4] === x ? " selected" : ""}>${x}</option>`).join("")}</select></div>
+            <div class="sm:col-span-2"><label class="lbl" for="xds">Descrição (aparece na página do produto)</label><textarea class="inp" id="xds" rows="3" maxlength="600">${esc((e && e[7]) || "")}</textarea></div>
+            <div class="sm:col-span-2"><label class="lbl" for="xcr">Características (uma por linha)</label><textarea class="inp" id="xcr" rows="4" maxlength="600" placeholder="Embalagem de 10 kg&#10;Para cães adultos">${esc((e && e[8]) || "")}</textarea></div>
+            <div class="sm:col-span-2 flex flex-wrap items-center gap-4"><div id="xprev" class="pimg" style="width:96px;flex:none">${fotoBox(cur)}</div><div><label class="lbl" for="xf">Foto do produto</label><input type="file" id="xf" accept="image/*" class="text-sm"><p class="text-xs text-gd/60 mt-1">Ideal: quadrada, 800 × 800 px. O centro da imagem é cortado automaticamente.</p><button type="button" id="xrm" class="text-xs font-bold text-red-700 underline mt-1">Remover foto</button></div></div>
+            <label class="flex items-center gap-3 font-bold text-gd self-end"><input type="checkbox" id="xd" class="w-5 h-5" style="accent-color:#678d3c"${e && e[5] ? " checked" : ""}>Mostrar em destaque na página inicial</label>
+            <div class="sm:col-span-2 flex flex-wrap gap-3"><button class="btn bg-g text-white justify-center">${e ? "Salvar alterações" : "Adicionar produto"}</button>${e ? '<button type="button" data-a="adm_pcancel" class="btn bg-white text-gd shadow-[0_4px_0_#cfe39a]">Cancelar edição</button>' : ""}</div></form>
+          <div class="flex flex-wrap justify-between items-center gap-2 mt-8"><h3 class="font-semibold text-lg">${P.length} ${P.length === 1 ? "produto" : "produtos"}</h3><button data-a="adm_preset" class="text-sm font-bold text-red-700 underline">Restaurar catálogo original</button></div>
+          <div class="space-y-3 mt-3">${P.map(([, n, v, c, pt, d, f], i) => `<div class="card p-4 flex flex-wrap items-center gap-4${i === pedit ? " ring-4 ring-g" : ""}"><span class="pimg thumb" aria-hidden="true">${fotoBox(f, esc(n))}</span><div class="flex-1" style="min-width:160px"><p class="font-bold">${esc(n)}${d ? ' <span class="bg-gl text-gd text-xs font-bold rounded-full px-2 py-0.5 ml-1">Destaque</span>' : ""}</p><p class="text-sm text-gd/70">${esc(c)} • ${esc(pt)} • <b class="text-g">${R(v)}</b></p></div><a href="produto.html?id=${i}" class="text-sm font-bold text-g underline">Ver página</a><button data-a="adm_pedit" data-i="${i}" class="btn bg-white text-gd text-sm px-4 py-2 shadow-[0_4px_0_#cfe39a]">Editar</button><button data-a="adm_pdel" data-i="${i}" class="text-red-700 text-sm font-bold">Excluir</button></div>`).join("") || vazioAdm("Nenhum produto cadastrado.")}</div>`;
+      },
       adm_clientes: (u) =>
         `<h2 class="text-2xl font-bold text-gd">Clientes e administradores</h2><div class="space-y-3 mt-5">${todos()
           .map(
@@ -526,6 +546,53 @@ const pg = {
           }),
       );
       const p = $("#panel");
+      // foto do produto: recorta o centro em quadrado e reduz (fica leve para salvar no navegador)
+      const fi = $("#xf");
+      if (fi) {
+        const prev = (f) => {
+          $("#xprev").className = "pimg";
+          $("#xprev").innerHTML = fotoBox(f);
+        };
+        fi.onchange = () => {
+          const arq = fi.files[0];
+          if (!arq) return;
+          const fr = new FileReader();
+          fr.onload = () => {
+            const im = new Image();
+            im.onload = () => {
+              const T = 700,
+                cv = document.createElement("canvas"),
+                s = Math.min(im.width, im.height);
+              cv.width = cv.height = T;
+              const g = cv.getContext("2d");
+              g.fillStyle = "#fff";
+              g.fillRect(0, 0, T, T);
+              g.drawImage(
+                im,
+                (im.width - s) / 2,
+                (im.height - s) / 2,
+                s,
+                s,
+                0,
+                0,
+                T,
+                T,
+              );
+              pfoto = cv.toDataURL("image/jpeg", 0.82);
+              prev(pfoto);
+            };
+            im.onerror = () =>
+              toast("Não consegui abrir essa imagem. Tente outro arquivo.");
+            im.src = fr.result;
+          };
+          fr.readAsDataURL(arq);
+        };
+        $("#xrm").onclick = () => {
+          pfoto = "";
+          fi.value = "";
+          prev("");
+        };
+      }
       p.onclick = (e) => {
         const b = e.target.closest("[data-a]");
         if (!b) return;
@@ -556,6 +623,62 @@ const pg = {
         if (!adm || adm.role !== "admin")
           return toast("Acesso restrito a administradores");
         const acao = b.dataset.a;
+        if (acao === "adm_pedit") {
+          pedit = +b.dataset.i;
+          pfoto = null;
+          dash();
+          icons();
+          const f = $("#prf");
+          if (f) f.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        if (acao === "adm_pcancel") {
+          pedit = -1;
+          pfoto = null;
+          dash();
+          icons();
+          return;
+        }
+        if (acao === "adm_pdel") {
+          const i = +b.dataset.i,
+            pr = P[i];
+          if (!pr || !confirm(`Excluir "${pr[1]}" da loja?`)) return;
+          P.splice(i, 1);
+          // o carrinho guarda o número do produto: reajusta para não trocar de item
+          const nc = {};
+          Object.keys(cart).forEach((k) => {
+            const n = +k;
+            if (n !== i) nc[n > i ? n - 1 : n] = cart[k];
+          });
+          cart = nc;
+          if (pedit === i) {
+            pedit = -1;
+            pfoto = null;
+          } else if (pedit > i) pedit--;
+          saveProds();
+          draw();
+          toast("Produto excluído");
+          dash();
+          icons();
+          return;
+        }
+        if (acao === "adm_preset") {
+          if (
+            !confirm(
+              "Voltar ao catálogo original? Suas alterações nos produtos serão perdidas.",
+            )
+          )
+            return;
+          resetProds();
+          cart = {};
+          pedit = -1;
+          pfoto = null;
+          draw();
+          toast("Catálogo original restaurado");
+          dash();
+          icons();
+          return;
+        }
         const all = Users(),
           c = all[b.dataset.e],
           id = +b.dataset.id;
@@ -609,6 +732,44 @@ const pg = {
       };
       p.onsubmit = (e) => {
         e.preventDefault();
+        if (e.target.id === "prf") {
+          const adm = me();
+          if (!adm || adm.role !== "admin")
+            return toast("Acesso restrito a administradores");
+          const limpa = (s) => s.trim().replace(/[<>]/g, "").replace(/"/g, "”");
+          const prod = [
+            "",
+            limpa($("#xn").value),
+            Math.round(parseFloat($("#xp").value) * 100) / 100,
+            limpa($("#xc").value),
+            $("#xt").value,
+            $("#xd").checked ? 1 : 0,
+          ];
+          if (!prod[1] || !prod[3]) return toast("Preencha nome e categoria");
+          if (!(prod[2] > 0)) return toast("Informe um preço válido");
+          prod[6] = pfoto !== null ? pfoto : (pedit >= 0 && P[pedit][6]) || "";
+          prod[7] = limpa($("#xds").value);
+          prod[8] = limpa($("#xcr").value);
+          const antes = P.map((x) => [...x]),
+            editando = pedit >= 0;
+          if (editando) P[pedit] = prod;
+          else P.push(prod);
+          if (!saveProds()) {
+            P.length = 0;
+            P.push(...antes);
+            refreshCats();
+            return toast(
+              "Sem espaço para salvar tantas fotos. Use uma foto menor ou coloque os arquivos na pasta assets/produtos.",
+            );
+          }
+          toast(editando ? "Produto atualizado ✅" : "Produto adicionado ✅");
+          pedit = -1;
+          pfoto = null;
+          draw();
+          dash();
+          icons();
+          return;
+        }
         const x = me();
         if (e.target.id === "pf") {
           x.pets.push({

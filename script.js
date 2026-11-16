@@ -21,6 +21,29 @@ const LS = {
   },
 };
 
+/* ---------- Catálogo editável: o administrador altera e fica salvo neste navegador ---------- */
+const P_ORIG = P.map((p) => [...p]),
+  CATS_ORIG = [...CATS];
+const refreshCats = () => {
+  const usadas = new Set(P.map((p) => p[3]));
+  const lista = [
+    ...CATS_ORIG.filter((c) => usadas.has(c)),
+    ...[...usadas].filter((c) => !CATS_ORIG.includes(c)),
+  ];
+  CATS.length = 0;
+  CATS.push(...lista);
+};
+const saveProds = () => {
+  let ok = true;
+  try {
+    localStorage.setItem("ps_prods", JSON.stringify(P.map((p) => [...p])));
+  } catch {
+    ok = false;
+  }
+  refreshCats();
+  return ok;
+};
+
 /* ---------- Fotos dos produtos ---------- */
 // foto pode ser: nome-sem-extensão (procura em assets/produtos/ como .jpg, .webp, .png ou .jpeg),
 // um caminho com extensão, ou uma foto enviada pelo painel do administrador (data:).
@@ -52,6 +75,26 @@ const fotoBox = (f, n = "") => {
   return `${PATINHA}${s ? `<img src="${s}" alt="${n}" loading="lazy"${base ? ` data-f="${f}" data-t="0" onerror="fotoErr(this)"` : ' onerror="this.remove()"'} onload="this.parentNode.classList.add('tem')">` : ""}`;
 };
 const fotoHTML = (i) => fotoBox(P[i][6], P[i][1]);
+const resetProds = () => {
+  P.length = 0;
+  P.push(...P_ORIG.map((p) => [...p]));
+  try {
+    localStorage.removeItem("ps_prods");
+  } catch {}
+  refreshCats();
+};
+{
+  const salvo = LS.get("ps_prods", null);
+  if (
+    Array.isArray(salvo) &&
+    salvo.length &&
+    salvo.every((p) => Array.isArray(p) && p.length >= 5)
+  ) {
+    P.length = 0;
+    P.push(...salvo);
+  }
+  refreshCats();
+}
 
 /* ---------- Conta (demonstrativo: dados ficam só neste navegador) ---------- */
 const hash = (s) => {
