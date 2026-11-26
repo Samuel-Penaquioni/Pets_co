@@ -1,0 +1,47 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: petsco_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: petsco_root
+      MYSQL_DATABASE: petsco_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-ppetsco_root"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: petsco_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://root:petsco_root@db:3306/petsco_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: nginx:alpine
+    container_name: petsco_web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
