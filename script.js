@@ -1,9 +1,29 @@
 /* script.js — comum a todas as páginas: cabeçalho, rodapé, carrinho, conta */
 
+window.api = async function (path, options = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const res = await fetch(`/api${path}`, {
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      signal: ctrl.signal,
+      ...options,
+    });
+    if (res.status === 204) return null;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.detail || "Erro ao comunicar com o servidor");
+    }
+    return data;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const R = (v) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const icons = () => window.lucide && window.lucide.createIcons();
 const LS = {
   get: (k, d) => {
@@ -21,7 +41,7 @@ const LS = {
   },
 };
 
-/* ---------- Catálogo editável: o administrador altera e fica salvo neste navegador ---------- */
+/* ---------- Catálogo sincronizado com o MySQL ---------- */
 const CATS_ORIG = [...CATS];
 const refreshCats = () => {
   const usadas = new Set(P.map((p) => p[3]));
@@ -32,20 +52,36 @@ const refreshCats = () => {
   CATS.length = 0;
   CATS.push(...lista);
 };
-const saveProds = () => {
-  let ok = true;
+
+const prodById = (id) => P.find((p) => Number(p[0]) === Number(id));
+
+async function carregarProdutosAPI() {
   try {
-    localStorage.setItem("ps_prods", JSON.stringify(P.map((p) => [...p])));
-  } catch {
-    ok = false;
+    const lista = await api("/produtos");
+    P.length = 0;
+    lista.forEach((item) => {
+      P.push([
+        item.id,
+        item.nome,
+        Number(item.preco),
+        item.categoria,
+        item.pet,
+        item.destaque ? 1 : 0,
+        item.foto || "",
+        item.descricao || "",
+        item.caracteristicas || "",
+      ]);
+    });
+    refreshCats();
+  } catch (err) {
+    console.warn("Usando fallback local de data.js:", err.message);
+    P.forEach((p, idx) => {
+      if (!p[0]) p[0] = idx + 1;
+    });
   }
-  refreshCats();
-  return ok;
-};
+}
 
 /* ---------- Fotos dos produtos ---------- */
-// foto pode ser: nome-sem-extensão (procura em assets/produtos/ como .jpg, .webp, .png ou .jpeg),
-// um caminho com extensão, ou uma foto enviada pelo painel do administrador (data:).
 const EXTS = ["jpg", "webp", "png", "jpeg"];
 const FOTO_DIRETA = /^data:|\.(jpe?g|png|webp|gif|avif)$/i;
 const fotoSrc = (f, t = 0) =>
@@ -64,7 +100,7 @@ function fotoErr(img) {
   if (s) {
     img.dataset.t = t;
     img.src = s;
-  } else img.remove(); // sem foto: aparece o emoji
+  } else img.remove();
 }
 const PATINHA =
   '<span class="pph"><svg viewBox="0 0 64 64" fill="currentColor" aria-hidden="true"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="16" cy="28" r="6"/><circle cx="26" cy="17" r="6"/><circle cx="38" cy="17" r="6"/><circle cx="48" cy="28" r="6"/></svg></span>';
@@ -73,32 +109,16 @@ const fotoBox = (f, n = "") => {
     base = s && !FOTO_DIRETA.test(f);
   return `${PATINHA}${s ? `<img src="${s}" alt="${n}" loading="lazy"${base ? ` data-f="${f}" data-t="0" onerror="fotoErr(this)"` : ' onerror="this.remove()"'} onload="this.parentNode.classList.add('tem')">` : ""}`;
 };
-const fotoHTML = (i) => fotoBox(P[i][6], P[i][1]);
-{
-  const salvo = LS.get("ps_prods", null);
-  if (
-    Array.isArray(salvo) &&
-    salvo.length &&
-    salvo.every((p) => Array.isArray(p) && p.length >= 5)
-  ) {
-    P.length = 0;
-    P.push(...salvo);
-  }
-  refreshCats();
-}
-
-/* ---------- Conta (demonstrativo: dados ficam só neste navegador) ---------- */
-const hash = (s) => {
-  let h = 0;
-  for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0;
-  return String(h);
+const fotoHTML = (id) => {
+  const p = prodById(id);
+  return p ? fotoBox(p[6], p[1]) : PATINHA;
 };
-const Users = () => LS.get("ps_users", {});
-const me = () => Users()[LS.get("ps_me")] || null;
-const saveMe = (u) => {
-  const all = Users();
-  all[u.email] = u;
-  LS.set("ps_users", all);
+
+/* ---------- Sessão da conta ---------- */
+const me = () => LS.get("ps_session", null);
+const setSession = (u) => {
+  LS.set("ps_session", u);
+  who();
 };
 const first = () => {
   const u = me();
@@ -235,13 +255,11 @@ function layout() {
     </aside>`,
   );
 
-  // menu mobile: cópia do menu do cachorro (sem o indicador)
   $(".mbar").innerHTML = $(".menu").innerHTML.replace(
     '<span class="glider"></span>',
     "",
   );
 
-  // selo "Aberto agora / Fechado agora" no rodapé
   const d = new Date(),
     dia = d.getDay(),
     hr = d.getHours() + d.getMinutes() / 60;
@@ -263,23 +281,27 @@ const FRETE_GRATIS = 99,
   FRETE = 12.9;
 let cart = LS.get("ps_cart", {});
 
-const card = (i) => {
-  const [e, n, v, c] = P[i];
+const card = (id) => {
+  const prod = prodById(id);
+  if (!prod) return "";
+  const [, n, v, c] = prod;
   return `<article class="card p-5 text-center flex flex-col">
-    <a href="produto.html?id=${i}" class="block" tabindex="-1" aria-hidden="true"><div class="pimg">${fotoHTML(i)}</div></a>
+    <a href="produto.html?id=${id}" class="block" tabindex="-1" aria-hidden="true"><div class="pimg">${fotoHTML(id)}</div></a>
     <p class="text-xs font-bold text-g mt-3">${c}</p>
-    <h3 class="font-semibold leading-tight mt-1 flex-1"><a href="produto.html?id=${i}" class="plink">${n}</a></h3>
+    <h3 class="font-semibold leading-tight mt-1 flex-1"><a href="produto.html?id=${id}" class="plink">${n}</a></h3>
     <p class="t text-xl font-bold text-g mt-1">${R(v)}</p>
-    <button onclick="add(${i})" class="btn bg-g text-white mt-3 text-sm px-4 py-2 w-full justify-center" aria-label="Adicionar ${n} ao carrinho">
+    <button onclick="add(${id})" class="btn bg-g text-white mt-3 text-sm px-4 py-2 w-full justify-center" aria-label="Adicionar ${n} ao carrinho">
       <i data-lucide="shopping-cart" class="w-4 h-4"></i>Adicionar
     </button>
   </article>`;
 };
 
-function add(i) {
-  cart[i] = (cart[i] || 0) + 1;
+function add(id) {
+  const prod = prodById(id);
+  if (!prod) return;
+  cart[id] = (cart[id] || 0) + 1;
   draw();
-  toast(`${P[i][1]} no carrinho 🛒`);
+  toast(`${prod[1]} no carrinho 🛒`);
   $$(".badge").forEach((b) => {
     b.classList.remove("pop");
     void b.offsetWidth;
@@ -287,28 +309,29 @@ function add(i) {
   });
 }
 
-function chg(i, d) {
-  cart[i] += d;
-  if (cart[i] <= 0) delete cart[i];
+function chg(id, d) {
+  cart[id] = (cart[id] || 0) + d;
+  if (cart[id] <= 0) delete cart[id];
   draw();
 }
 
 function draw() {
-  const k = Object.keys(cart).filter((i) => P[i]);
+  const k = Object.keys(cart).filter((id) => prodById(id));
   let n = 0,
     t = 0;
 
   $("#items").innerHTML = k.length
     ? k
-        .map((i) => {
-          n += cart[i];
-          t += cart[i] * P[i][2];
+        .map((id) => {
+          const prod = prodById(id);
+          n += cart[id];
+          t += cart[id] * prod[2];
           return `<div class="flex items-center gap-3 bg-cr rounded-xl p-3">
-      <span class="pimg thumb" aria-hidden="true">${fotoHTML(i)}</span>
-      <div class="flex-1 text-sm"><p class="font-bold">${P[i][1]}</p><p class="text-g font-bold">${R(P[i][2])}</p></div>
-      <button onclick="chg(${i}, -1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Diminuir quantidade de ${P[i][1]}">−</button>
-      <b>${cart[i]}</b>
-      <button onclick="chg(${i}, 1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Aumentar quantidade de ${P[i][1]}">+</button>
+      <span class="pimg thumb" aria-hidden="true">${fotoHTML(id)}</span>
+      <div class="flex-1 text-sm"><p class="font-bold">${prod[1]}</p><p class="text-g font-bold">${R(prod[2])}</p></div>
+      <button onclick="chg(${id}, -1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Diminuir quantidade de ${prod[1]}">−</button>
+      <b>${cart[id]}</b>
+      <button onclick="chg(${id}, 1)" class="w-7 h-7 rounded-full bg-gl font-bold" aria-label="Aumentar quantidade de ${prod[1]}">+</button>
     </div>`;
         })
         .join("")
@@ -331,7 +354,6 @@ function draw() {
   LS.set("ps_cart", cart);
 }
 
-const dr = $("#drawer") || null;
 function openCart(e) {
   if (e) e.preventDefault();
   $("#drawer").inert = false;
@@ -344,8 +366,8 @@ function closeCart() {
   $("#drawer").inert = true;
 }
 
-function checkout() {
-  const k = Object.keys(cart).filter((i) => P[i]);
+async function checkout() {
+  const k = Object.keys(cart).filter((id) => prodById(id));
   if (!k.length)
     return toast("Seu carrinho está vazio. Adicione um produto 🐾");
   const u = me();
@@ -357,25 +379,25 @@ function checkout() {
     toast("Entre na sua conta para finalizar a compra");
     return setTimeout(() => (location.href = "conta.html"), 1000);
   }
-  const sub = k.reduce((s, i) => s + cart[i] * P[i][2], 0);
-  u.orders.unshift({
-    id: String(Date.now()).slice(-6),
-    ts: Date.now(),
-    date: new Date().toLocaleDateString("pt-BR"),
-    items: k.map((i) => ({ e: P[i][0], n: P[i][1], q: cart[i] })),
-    total: sub + (sub >= FRETE_GRATIS ? 0 : FRETE),
-    status: "Em preparo",
-  });
-  saveMe(u);
-  cart = {};
-  draw();
-  closeCart();
-  toast("Pedido realizado! Veja em Minha conta 🎉");
-  if (window.renderConta) renderConta();
+  try {
+    await api("/pedidos", {
+      method: "POST",
+      body: JSON.stringify({
+        usuario_id: u.id,
+        items: k.map((id) => ({ produto_id: Number(id), q: cart[id] })),
+      }),
+    });
+    cart = {};
+    draw();
+    closeCart();
+    toast("Pedido realizado! Veja em Minha conta 🎉");
+    if (window.renderConta) await renderConta();
+  } catch (err) {
+    toast(err.message);
+  }
 }
 
 /* ---------- Menu do cachorro: indicador e animação ---------- */
-const nav = () => $(".menu");
 const gl = () => $(".glider");
 const act = () => $(".menu .item.active") || $(".menu .item");
 let prev = null;
@@ -383,7 +405,7 @@ try {
   prev = JSON.parse(sessionStorage.getItem("ps_gl"));
 } catch {}
 if (prev && prev.vw !== innerWidth) prev = null;
-let liberado = !prev; // enquanto falso, o indicador fica onde estava na página anterior
+let liberado = !prev;
 let glSet = false;
 const glSalvar = (el) => {
   glSet = true;
@@ -426,7 +448,6 @@ function menuSetup() {
     mv(act()),
   );
 
-  // cachorro: anima ao passar o mouse e termina o ciclo antes de voltar à imagem parada
   const dg = $(".dog"),
     CICLO = 4840;
   new Image().src = "assets/images/cachorro-anim.webp";
@@ -466,7 +487,6 @@ function menuSetup() {
   dogDesligar = desligar;
   if (prev) $(".menu").classList.add("chega");
 
-  // troca de página: conteúdo some suave, indicador desliza até a aba clicada
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a[href]");
     if (
@@ -518,7 +538,7 @@ icons();
 mv(act());
 if (location.hash === "#carrinho") openCart();
 
-/* ---------- Mostra a página só quando estiver pronta (evita piscar ao trocar de página) ---------- */
+/* ---------- Mostra a página só quando estiver pronta ---------- */
 const imgOk = (src) => {
   const i = new Image();
   i.src = src;
@@ -533,7 +553,6 @@ function mostrar() {
     liberado = true;
     mv(act());
   }
-  // ao chegar de outra página, o cachorro dá uma abanada
   let veio = false;
   try {
     veio = sessionStorage.getItem("ps_nav");

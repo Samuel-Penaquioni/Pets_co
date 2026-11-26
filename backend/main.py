@@ -1,11 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
 import random
+import time
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 import models
@@ -13,11 +15,19 @@ import schemas
 from database import Base, SessionLocal, engine, get_db
 from seed import popular_banco_inicial
 
-Base.metadata.create_all(bind=engine)
-
-# Executa o seed inicial
-with SessionLocal() as db:
-    popular_banco_inicial(db)
+# Aguarda o MySQL estar realmente pronto antes de criar tabelas e rodar o seed
+for tentativa in range(1, 16):
+    try:
+        Base.metadata.create_all(bind=engine)
+        with SessionLocal() as db:
+            popular_banco_inicial(db)
+        print("Banco de dados conectado e pronto!")
+        break
+    except OperationalError:
+        print(f"Aguardando MySQL iniciar... ({tentativa}/15)")
+        time.sleep(2)
+else:
+    raise RuntimeError("Não foi possível conectar ao MySQL após 30 segundos.")
 
 app = FastAPI(title="Pets’co API", version="1.0.0")
 
@@ -28,6 +38,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/")
+def root():
+    return {"status": "online", "app": "Pets’co API", "docs": "/docs"}
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 FRETE_GRATIS = Decimal("99.00")
