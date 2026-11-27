@@ -32,7 +32,8 @@ Pets_co/
 │   ├── database.py          # Configuração de conexão e sessão com o MySQL
 │   ├── seed.py              # Carga inicial de produtos e usuário administrador
 │   ├── requirements.txt     # Dependências do ambiente Python
-│   └── Dockerfile           # Instruções de build da imagem do backend
+│   ├── Dockerfile           # Instruções de build da imagem do backend
+│   └── petsco_db.sql        # Script SQL completo para criação e carga do banco
 ├── index.html               # Página inicial (vitrine e destaques)
 ├── produtos.html            # Catálogo completo com filtros
 ├── produto.html             # Página de detalhes do produto selecionado
@@ -46,9 +47,7 @@ Pets_co/
 ├── style.css                # Estilização customizada e animações
 ├── nginx.conf               # Configuração do Nginx e proxy reverso (/api -> backend)
 ├── Dockerfile               # Imagem do frontend (Nginx)
-├── docker-compose.yml       # Orquestração dos serviços (Frontend, Backend e MySQL)
-├── vercel.json              # Configuração de rewrites para deploy na Vercel
-└── petsco_db.sql            # Script SQL completo para criação e carga do banco
+└── docker-compose.yml       # Orquestração dos serviços (Frontend, Backend e MySQL)
 ```
 
 ---
@@ -131,6 +130,6 @@ O banco relacional `petsco_db` é estruturado nas seguintes tabelas:
 
 Projeto desenvolvido por:
 
-* **Bryan Gimenes**
-* **Maria Clara Sachetto**
+* **Bryan Gimenes** - [GitHub](https://github.com/BryanGimenes)
+* **Maria Clara Sachetto** - [GitHub](https://github.com/codedbyclara)
 * **Samuel Vicente Penaquioni** — [GitHub](https://github.com/Samuel-Penaquioni)

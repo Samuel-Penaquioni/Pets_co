@@ -271,9 +271,3 @@ const HORAS = [
   "17:00",
   "18:00",
 ];
-
-// Acesso do administrador (entre na aba "Entrar" com estes dados). Troque por valores seus.
-// ATENÇÃO: como o site não tem servidor, estes dados ficam visíveis no navegador.
-// Serve para a demonstração acadêmica; um sistema real valida o login no servidor.
-const ADMIN_LOGIN = "admin";
-const ADMIN_PASS = "petsco@2026";
